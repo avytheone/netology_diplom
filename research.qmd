@@ -1,0 +1,37 @@
+---
+title: "Дипломная работа по теме \"Анализ данных о сердечно-сосудистых заболеваниях\""
+author:
+  - name: Алексей Якиманский
+    id: avytheone
+    email: yakimanskiyav@yandex.ru
+    affiliation: Netology, DSU-73
+abstract: >
+    Это дипломная работа по теме "Анализ данных о сердечно-сосудистых заболеваниях"
+copyright: 
+  holder: Алексей Якиманский
+  year: 2026
+license: "CC BY"
+pdf-engine: typst
+mainfont: "Times New Roman"
+
+---
+
+# Датасет
+
+Внешнюю информацию о датасете можно найти по ссылке: [Kaggle Dataset](https://www.kaggle.com/datasets/sulianova/cardiovascular-disease-dataset)
+
+```{python}
+
+#| label: fig-polar
+#| fig-cap: "Пример синусоиды"
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+x = np.linspace(0, 1.2 * np.pi, 100)
+y = np.sin(x)
+
+plt.figure()
+plt.plot(x, y)
+plt.show()
+```
