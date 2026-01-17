@@ -3,11 +3,99 @@
 version: '3'
 
 vars:
-  GREETING: Hello, world!
+  PROJECT_NAME: diabetes-analysis
+  RESEARCH_DOC: research.qmd
+  PRESENTATION_DOC: presentation.qmd
+  OUTPUT_DIR: out
+  PYTHON: uv run python
+  QUARTO: uv run quarto
 
 tasks:
   default:
-    desc: Print a greeting message
+    desc: Show available commands
     cmds:
-      - echo "{{.GREETING}}"
+      - task --list
     silent: true
+
+  setup:
+    desc: Setup project dependencies
+    cmds:
+      - uv sync
+
+  clean:
+    desc: Clean output directory
+    cmds:
+      - rm -rf {{.OUTPUT_DIR}}/*_files
+      - rm -f {{.OUTPUT_DIR}}/*.html
+      - rm -f {{.OUTPUT_DIR}}/*.pdf
+
+  research:
+    desc: Build research document (HTML and PDF)
+    cmds:
+      - "{{.QUARTO}} render {{.RESEARCH_DOC}} --to html"
+      - "{{.QUARTO}} render {{.RESEARCH_DOC}} --to pdf"
+      - mv research.html research.pdf {{.OUTPUT_DIR}}/
+
+  research:html:
+    desc: Build research document (HTML only)
+    cmds:
+      - "{{.QUARTO}} render {{.RESEARCH_DOC}} --to html"
+      - mv research.html {{.OUTPUT_DIR}}/
+      - mv -f research_files/ {{.OUTPUT_DIR}}/research_files/
+
+  research:pdf:
+    desc: Build research document (PDF only)
+    cmds:
+      - "{{.QUARTO}} render {{.RESEARCH_DOC}} --to pdf"
+      - mv research.pdf {{.OUTPUT_DIR}}/
+
+  presentation:
+    desc: Build presentation document
+    cmds:
+      - "{{.QUARTO}} render {{.PRESENTATION_DOC}} --to html"
+      - mv presentation.html {{.OUTPUT_DIR}}/
+
+  preview:
+    desc: Start live preview server for research
+    cmds:
+      - "{{.QUARTO}} preview {{.RESEARCH_DOC}} --port 4200 --no-browser"
+
+  preview:presentation:
+    desc: Start live preview for presentation
+    cmds:
+      - "{{.QUARTO}} preview {{.PRESENTATION_DOC}} --port 4201 --no-browser"
+
+  build:all:
+    desc: Build all documents
+    cmds:
+      - task: research
+      - task: presentation
+
+  validate:
+    desc: Validate documents without building
+    cmds:
+      - echo "Validating Quarto installation..."
+      - "{{.QUARTO}} --version"
+      - echo "Checking document files exist..."
+      - test -f {{.RESEARCH_DOC}}
+      - test -f {{.PRESENTATION_DOC}}
+      - echo "Checking data file exists..."
+      - test -f cardio_train.csv
+
+  check:
+    desc: Run project quality checks
+    cmds:
+      - task: validate
+      - "{{.PYTHON}} -m py_compile {{.RESEARCH_DOC}}"
+
+  deploy:prepare:
+    desc: Prepare for deployment
+    cmds:
+      - task: clean
+      - task: build:all
+
+  dev:
+    desc: Development workflow (build + preview)
+    cmds:
+      - task: research:html
+      - task: preview
