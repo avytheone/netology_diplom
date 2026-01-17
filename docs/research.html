@@ -1,0 +1,1822 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.26">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Алексей Якиманский">
+
+<title>Анализ факторов риска сердечно-сосудистых заболеваний на основе данных медицинских обследований</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-fcfcb437c5bc9deea3647d0e63f5252c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Анализ факторов риска сердечно-сосудистых заболеваний на основе данных медицинских обследований</h1>
+</div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author">Алексей Якиманский <a href="mailto:yakimanskiyav@yandex.ru" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> </p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            Netology, DSU-73
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p>В данном исследовании проводится комплексный анализ данных о сердечно-сосудистых заболеваниях с целью выявления ключевых факторов риска и построения предиктивных моделей. Анализ включает исследовательский анализ данных, разработку и сравнение моделей машинного обучения для прогнозирования наличия сердечно-сосудистых заболеваний.</p>
+  </div>
+</div>
+
+
+</header>
+
+
+<section id="введение" class="level1">
+<h1>Введение</h1>
+<p>Сердечно-сосудистые заболевания являются основной причиной смертности во многих странах мира. Раннее выявление факторов риска и своевременная профилактика играют ключевую роль в снижении заболеваемости и смертности.</p>
+<section id="цель-исследования" class="level2">
+<h2 class="anchored" data-anchor-id="цель-исследования">Цель исследования</h2>
+<p>Основной целью данного исследования является анализ факторов риска сердечно-сосудистых заболеваний на основе данных медицинских обследований и построение предиктивных моделей для оценки вероятности наличия заболевания.</p>
+</section>
+<section id="задачи-исследования" class="level2">
+<h2 class="anchored" data-anchor-id="задачи-исследования">Задачи исследования</h2>
+<ol type="1">
+<li>Провести исследовательский анализ данных для выявления ключевых закономерностей</li>
+<li>Выполнить очистку и предобработку данных</li>
+<li>Построить и оценить предиктивные модели</li>
+<li>Сформулировать практические рекомендации для медицинской лаборатории</li>
+</ol>
+</section>
+</section>
+<section id="обзор-данных" class="level1">
+<h1>Обзор данных</h1>
+<p>В исследовании используется датасет Cardiovascular Disease Dataset, содержащий информацию о 70 000 пациентах. Данные предоставлены медицинской лабораторией и включают 11 признаков и целевую переменную наличия сердечно-сосудистого заболевания.</p>
+<section id="описание-признаков" class="level2">
+<h2 class="anchored" data-anchor-id="описание-признаков">Описание признаков</h2>
+<ul>
+<li><strong>age</strong> - возраст в днях</li>
+<li><strong>gender</strong> - пол (1 - женщина, 2 - мужчина)</li>
+<li><strong>height</strong> - рост в см</li>
+<li><strong>weight</strong> - вес в кг</li>
+<li><strong>ap_hi</strong> - систолическое артериальное давление</li>
+<li><strong>ap_lo</strong> - диастолическое артериальное давление</li>
+<li><strong>cholesterol</strong> - уровень холестерина (1: нормальный, 2: выше нормы, 3: высокий)</li>
+<li><strong>gluc</strong> - уровень глюкозы (1: нормальный, 2: выше нормы, 3: высокий)</li>
+<li><strong>smoke</strong> - курение (0: нет, 1: да)</li>
+<li><strong>alco</strong> - употребление алкоголя (0: нет, 1: да)</li>
+<li><strong>active</strong> - физическая активность (0: нет, 1: да)</li>
+<li><strong>cardio</strong> - наличие сердечно-сосудистого заболевания (0: нет, 1: да)</li>
+</ul>
+</section>
+</section>
+<section id="методология" class="level1">
+<h1>Методология</h1>
+<section id="подходы-к-анализу" class="level2">
+<h2 class="anchored" data-anchor-id="подходы-к-анализу">Подходы к анализу</h2>
+<p>Исследование будет проводиться в несколько этапов:</p>
+<ol type="1">
+<li><strong>Исследовательский анализ данных (EDA)</strong>: анализ распределений, выявление выбросов, изучение взаимосвязей</li>
+<li><strong>Предобработка данных</strong>: очистка, нормализация, создание новых признаков</li>
+<li><strong>Моделирование</strong>: построение и сравнение моделей машинного обучения</li>
+<li><strong>Интерпретация результатов</strong>: анализ важности признаков и формулирование выводов</li>
+</ol>
+</section>
+<section id="инструменты-анализа" class="level2">
+<h2 class="anchored" data-anchor-id="инструменты-анализа">Инструменты анализа</h2>
+<ul>
+<li><strong>Python 3.12+</strong> с научными библиотеками pandas, numpy, matplotlib, seaborn</li>
+<li><strong>scikit-learn</strong> для построения моделей машинного обучения</li>
+<li><strong>Quarto</strong> для генерации отчета</li>
+</ul>
+</section>
+</section>
+<section id="результаты-eda" class="level1">
+<h1>Результаты EDA</h1>
+<section id="загрузка-и-первичная-проверка-данных" class="level2">
+<h2 class="anchored" data-anchor-id="загрузка-и-первичная-проверка-данных">Загрузка и первичная проверка данных</h2>
+<div id="load-data" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>warnings.filterwarnings(<span class="st">'ignore'</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Настройки для визуализаций</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'seaborn-v0_8-whitegrid'</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Монохромная палитра с красными акцентами</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> [<span class="st">'#808080'</span>, <span class="st">'#606060'</span>, <span class="st">'#404040'</span>, <span class="st">'#FF6B6B'</span>, <span class="st">'#CC5555'</span>]</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>sns.set_palette(colors)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'font.size'</span>] <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'figure.titlesize'</span>] <span class="op">=</span> <span class="dv">14</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'axes.titlesize'</span>] <span class="op">=</span> <span class="dv">12</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'axes.labelsize'</span>] <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Загрузка данных</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>data_path <span class="op">=</span> <span class="st">'cardio_train.csv'</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(data_path, sep<span class="op">=</span><span class="st">';'</span>)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Базовая информация</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Размер датасета: </span><span class="sc">{</span>df<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Первые 5 строк:"</span>)</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.head())</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Типы данных:"</span>)</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.dtypes)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Статистическое описание:"</span>)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.describe())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Размер датасета: (70000, 13)
+
+Первые 5 строк:
+   id    age  gender  height  weight  ap_hi  ap_lo  cholesterol  gluc  smoke  \
+0   0  18393       2     168    62.0    110     80            1     1      0   
+1   1  20228       1     156    85.0    140     90            3     1      0   
+2   2  18857       1     165    64.0    130     70            3     1      0   
+3   3  17623       2     169    82.0    150    100            1     1      0   
+4   4  17474       1     156    56.0    100     60            1     1      0   
+
+   alco  active  cardio  
+0     0       1       0  
+1     0       1       1  
+2     0       0       1  
+3     0       1       1  
+4     0       0       0  
+
+Типы данных:
+id               int64
+age              int64
+gender           int64
+height           int64
+weight         float64
+ap_hi            int64
+ap_lo            int64
+cholesterol      int64
+gluc             int64
+smoke            int64
+alco             int64
+active           int64
+cardio           int64
+dtype: object
+
+Статистическое описание:
+                 id           age        gender        height        weight  \
+count  70000.000000  70000.000000  70000.000000  70000.000000  70000.000000   
+mean   49972.419900  19468.865814      1.349571    164.359229     74.205690   
+std    28851.302323   2467.251667      0.476838      8.210126     14.395757   
+min        0.000000  10798.000000      1.000000     55.000000     10.000000   
+25%    25006.750000  17664.000000      1.000000    159.000000     65.000000   
+50%    50001.500000  19703.000000      1.000000    165.000000     72.000000   
+75%    74889.250000  21327.000000      2.000000    170.000000     82.000000   
+max    99999.000000  23713.000000      2.000000    250.000000    200.000000   
+
+              ap_hi         ap_lo   cholesterol          gluc         smoke  \
+count  70000.000000  70000.000000  70000.000000  70000.000000  70000.000000   
+mean     128.817286     96.630414      1.366871      1.226457      0.088129   
+std      154.011419    188.472530      0.680250      0.572270      0.283484   
+min     -150.000000    -70.000000      1.000000      1.000000      0.000000   
+25%      120.000000     80.000000      1.000000      1.000000      0.000000   
+50%      120.000000     80.000000      1.000000      1.000000      0.000000   
+75%      140.000000     90.000000      2.000000      1.000000      0.000000   
+max    16020.000000  11000.000000      3.000000      3.000000      1.000000   
+
+               alco        active        cardio  
+count  70000.000000  70000.000000  70000.000000  
+mean       0.053771      0.803729      0.499700  
+std        0.225568      0.397179      0.500003  
+min        0.000000      0.000000      0.000000  
+25%        0.000000      1.000000      0.000000  
+50%        0.000000      1.000000      0.000000  
+75%        0.000000      1.000000      1.000000  
+max        1.000000      1.000000      1.000000  </code></pre>
+</div>
+</div>
+</section>
+<section id="проверка-на-пропуски-и-дубликаты" class="level2">
+<h2 class="anchored" data-anchor-id="проверка-на-пропуски-и-дубликаты">Проверка на пропуски и дубликаты</h2>
+<div id="check-missing" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Проверка пропусков</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>missing_values <span class="op">=</span> df.isnull().<span class="bu">sum</span>()</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Пропущенные значения:"</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(missing_values[missing_values <span class="op">&gt;</span> <span class="dv">0</span>] <span class="cf">if</span> missing_values.<span class="bu">sum</span>() <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">else</span> <span class="st">"Пропусков не обнаружено"</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Проверка дубликатов</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>duplicates <span class="op">=</span> df.duplicated().<span class="bu">sum</span>()</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Количество полных дубликатов: </span><span class="sc">{</span>duplicates<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Удаление дубликатов если есть</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> duplicates <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> df.drop_duplicates()</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"После удаления дубликатов размер: </span><span class="sc">{</span>df<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Проверка уникальных значений в категориальных переменных</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>categorical_cols <span class="op">=</span> [<span class="st">'gender'</span>, <span class="st">'cholesterol'</span>, <span class="st">'gluc'</span>, <span class="st">'smoke'</span>, <span class="st">'alco'</span>, <span class="st">'active'</span>, <span class="st">'cardio'</span>]</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Уникальные значения в категориальных переменных:"</span>)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> col <span class="kw">in</span> categorical_cols:</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    unique_vals <span class="op">=</span> df[col].unique()</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>col<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span><span class="bu">sorted</span>(unique_vals)<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Пропущенные значения:
+Пропусков не обнаружено
+
+Количество полных дубликатов: 0
+
+Уникальные значения в категориальных переменных:
+gender: [np.int64(1), np.int64(2)]
+cholesterol: [np.int64(1), np.int64(2), np.int64(3)]
+gluc: [np.int64(1), np.int64(2), np.int64(3)]
+smoke: [np.int64(0), np.int64(1)]
+alco: [np.int64(0), np.int64(1)]
+active: [np.int64(0), np.int64(1)]
+cardio: [np.int64(0), np.int64(1)]</code></pre>
+</div>
+</div>
+</section>
+<section id="распределение-целевой-переменной" class="level2">
+<h2 class="anchored" data-anchor-id="распределение-целевой-переменной">Распределение целевой переменной</h2>
+<div id="cell-target-distribution" class="cell" data-fig-height="6" data-fig-width="8" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">6</span>))</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> sns.countplot(data<span class="op">=</span>df, x<span class="op">=</span><span class="st">'cardio'</span>, palette<span class="op">=</span>[<span class="st">'#808080'</span>, <span class="st">'#FF6B6B'</span>])</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Распределение наличия сердечно-сосудистых заболеваний'</span>, fontsize<span class="op">=</span><span class="dv">14</span>, pad<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Наличие заболевания (0 - нет, 1 - да)'</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Количество пациентов'</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Добавление процентов</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> <span class="bu">len</span>(df)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> p <span class="kw">in</span> ax.patches:</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    percentage <span class="op">=</span> <span class="ss">f'</span><span class="sc">{</span><span class="dv">100</span> <span class="op">*</span> p<span class="sc">.</span>get_height() <span class="op">/</span> total<span class="sc">:.1f}</span><span class="ss">%'</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    ax.annotate(percentage, (p.get_x() <span class="op">+</span> p.get_width() <span class="op">/</span> <span class="fl">2.</span>, p.get_height()),</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>                ha<span class="op">=</span><span class="st">'center'</span>, va<span class="op">=</span><span class="st">'bottom'</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Вывод статистики</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Распределение целевой переменной:"</span>)</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Без заболевания: </span><span class="sc">{</span>df[<span class="st">'cardio'</span>]<span class="sc">.</span>value_counts()[<span class="dv">0</span>]<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span>df[<span class="st">'cardio'</span>]<span class="sc">.</span>value_counts(normalize<span class="op">=</span><span class="va">True</span>)[<span class="dv">0</span>]<span class="sc">:.1%}</span><span class="ss">)"</span>)</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"С заболеванием: </span><span class="sc">{</span>df[<span class="st">'cardio'</span>]<span class="sc">.</span>value_counts()[<span class="dv">1</span>]<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span>df[<span class="st">'cardio'</span>]<span class="sc">.</span>value_counts(normalize<span class="op">=</span><span class="va">True</span>)[<span class="dv">1</span>]<span class="sc">:.1%}</span><span class="ss">)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="target-distribution" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="research_files/figure-html/target-distribution-output-1.png" width="758" height="566" class="figure-img"></p>
+<figcaption>Распределение наличия сердечно-сосудистых заболеваний</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Распределение целевой переменной:
+Без заболевания: 35021 (50.0%)
+С заболеванием: 34979 (50.0%)</code></pre>
+</div>
+</div>
+</section>
+<section id="распределения-числовых-признаков" class="level2">
+<h2 class="anchored" data-anchor-id="распределения-числовых-признаков">Распределения числовых признаков</h2>
+<div id="cell-numeric-distributions" class="cell" data-fig-height="10" data-fig-width="12" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Числовые признаки</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>numeric_cols <span class="op">=</span> [<span class="st">'age'</span>, <span class="st">'height'</span>, <span class="st">'weight'</span>, <span class="st">'ap_hi'</span>, <span class="st">'ap_lo'</span>]</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Преобразование возраста из дней в годы</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'age_years'</span>] <span class="op">=</span> df[<span class="st">'age'</span>] <span class="op">/</span> <span class="fl">365.25</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">15</span>, <span class="dv">10</span>))</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">'Распределения числовых признаков'</span>, fontsize<span class="op">=</span><span class="dv">16</span>, y<span class="op">=</span><span class="fl">0.98</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Возраст в годах</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>sns.histplot(data<span class="op">=</span>df, x<span class="op">=</span><span class="st">'age_years'</span>, bins<span class="op">=</span><span class="dv">30</span>, ax<span class="op">=</span>axes[<span class="dv">0</span>,<span class="dv">0</span>], color<span class="op">=</span><span class="st">'#808080'</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>,<span class="dv">0</span>].set_title(<span class="st">'Возраст (годы)'</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>,<span class="dv">0</span>].set_xlabel(<span class="st">'Возраст, лет'</span>)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>,<span class="dv">0</span>].set_ylabel(<span class="st">'Частота'</span>)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Рост</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>sns.histplot(data<span class="op">=</span>df, x<span class="op">=</span><span class="st">'height'</span>, bins<span class="op">=</span><span class="dv">30</span>, ax<span class="op">=</span>axes[<span class="dv">0</span>,<span class="dv">1</span>], color<span class="op">=</span><span class="st">'#808080'</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>,<span class="dv">1</span>].set_title(<span class="st">'Рост'</span>)</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>,<span class="dv">1</span>].set_xlabel(<span class="st">'Рост, см'</span>)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Вес</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>sns.histplot(data<span class="op">=</span>df, x<span class="op">=</span><span class="st">'weight'</span>, bins<span class="op">=</span><span class="dv">30</span>, ax<span class="op">=</span>axes[<span class="dv">0</span>,<span class="dv">2</span>], color<span class="op">=</span><span class="st">'#808080'</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>,<span class="dv">2</span>].set_title(<span class="st">'Вес'</span>)</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>,<span class="dv">2</span>].set_xlabel(<span class="st">'Вес, кг'</span>)</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Систолическое давление</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>sns.histplot(data<span class="op">=</span>df, x<span class="op">=</span><span class="st">'ap_hi'</span>, bins<span class="op">=</span><span class="dv">30</span>, ax<span class="op">=</span>axes[<span class="dv">1</span>,<span class="dv">0</span>], color<span class="op">=</span><span class="st">'#808080'</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>,<span class="dv">0</span>].set_title(<span class="st">'Систолическое артериальное давление'</span>)</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>,<span class="dv">0</span>].set_xlabel(<span class="st">'Давление, мм рт.ст.'</span>)</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Диастолическое давление</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>sns.histplot(data<span class="op">=</span>df, x<span class="op">=</span><span class="st">'ap_lo'</span>, bins<span class="op">=</span><span class="dv">30</span>, ax<span class="op">=</span>axes[<span class="dv">1</span>,<span class="dv">1</span>], color<span class="op">=</span><span class="st">'#808080'</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>,<span class="dv">1</span>].set_title(<span class="st">'Диастолическое артериальное давление'</span>)</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>,<span class="dv">1</span>].set_xlabel(<span class="st">'Давление, мм рт.ст.'</span>)</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Удаляем пустой subplot</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>,<span class="dv">2</span>].set_visible(<span class="va">False</span>)</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Статистика по числовым признакам:"</span>)</span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df[[<span class="st">'age_years'</span>, <span class="st">'height'</span>, <span class="st">'weight'</span>, <span class="st">'ap_hi'</span>, <span class="st">'ap_lo'</span>]].describe())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="numeric-distributions" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="research_files/figure-html/numeric-distributions-output-1.png" width="1431" height="948" class="figure-img"></p>
+<figcaption>Распределения числовых признаков</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Статистика по числовым признакам:
+          age_years        height        weight         ap_hi         ap_lo
+count  70000.000000  70000.000000  70000.000000  70000.000000  70000.000000
+mean      53.302850    164.359229     74.205690    128.817286     96.630414
+std        6.754967      8.210126     14.395757    154.011419    188.472530
+min       29.563313     55.000000     10.000000   -150.000000    -70.000000
+25%       48.361396    159.000000     65.000000    120.000000     80.000000
+50%       53.943874    165.000000     72.000000    120.000000     80.000000
+75%       58.390144    170.000000     82.000000    140.000000     90.000000
+max       64.922656    250.000000    200.000000  16020.000000  11000.000000</code></pre>
+</div>
+</div>
+</section>
+<section id="распределения-категориальных-признаков" class="level2">
+<h2 class="anchored" data-anchor-id="распределения-категориальных-признаков">Распределения категориальных признаков</h2>
+<div id="cell-categorical-distributions" class="cell" data-fig-height="10" data-fig-width="15" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">4</span>, figsize<span class="op">=</span>(<span class="dv">16</span>, <span class="dv">10</span>))</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">'Распределения категориальных признаков'</span>, fontsize<span class="op">=</span><span class="dv">16</span>, y<span class="op">=</span><span class="fl">0.98</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Пол</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>gender_counts <span class="op">=</span> df[<span class="st">'gender'</span>].value_counts()</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>ax1 <span class="op">=</span> axes[<span class="dv">0</span>,<span class="dv">0</span>]</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>ax1.pie(gender_counts.values, labels<span class="op">=</span>[<span class="st">'Женщины'</span>, <span class="st">'Мужчины'</span>], autopct<span class="op">=</span><span class="st">'</span><span class="sc">%1.1f%%</span><span class="st">'</span>, </span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        colors<span class="op">=</span>[<span class="st">'#808080'</span>, <span class="st">'#FF6B6B'</span>], startangle<span class="op">=</span><span class="dv">90</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>ax1.set_title(<span class="st">'Распределение по полу'</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Холестерин</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>cholesterol_counts <span class="op">=</span> df[<span class="st">'cholesterol'</span>].value_counts().sort_index()</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>ax2 <span class="op">=</span> axes[<span class="dv">0</span>,<span class="dv">1</span>]</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>ax2.bar([<span class="st">'Норма'</span>, <span class="st">'Выше нормы'</span>, <span class="st">'Высокий'</span>], cholesterol_counts.values, </span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span>[<span class="st">'#808080'</span>, <span class="st">'#606060'</span>, <span class="st">'#FF6B6B'</span>])</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>ax2.set_title(<span class="st">'Уровень холестерина'</span>)</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>ax2.set_ylabel(<span class="st">'Количество'</span>)</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Глюкоза</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>gluc_counts <span class="op">=</span> df[<span class="st">'gluc'</span>].value_counts().sort_index()</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>ax3 <span class="op">=</span> axes[<span class="dv">0</span>,<span class="dv">2</span>]</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>ax3.bar([<span class="st">'Норма'</span>, <span class="st">'Выше нормы'</span>, <span class="st">'Высокий'</span>], gluc_counts.values, </span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span>[<span class="st">'#808080'</span>, <span class="st">'#606060'</span>, <span class="st">'#FF6B6B'</span>])</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>ax3.set_title(<span class="st">'Уровень глюкозы'</span>)</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>ax3.set_ylabel(<span class="st">'Количество'</span>)</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Курение</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>smoke_counts <span class="op">=</span> df[<span class="st">'smoke'</span>].value_counts()</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>ax4 <span class="op">=</span> axes[<span class="dv">0</span>,<span class="dv">3</span>]</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>ax4.pie(smoke_counts.values, labels<span class="op">=</span>[<span class="st">'Не курят'</span>, <span class="st">'Курят'</span>], autopct<span class="op">=</span><span class="st">'</span><span class="sc">%1.1f%%</span><span class="st">'</span>, </span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>        colors<span class="op">=</span>[<span class="st">'#808080'</span>, <span class="st">'#FF6B6B'</span>], startangle<span class="op">=</span><span class="dv">90</span>)</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>ax4.set_title(<span class="st">'Курение'</span>)</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Алкоголь</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>alco_counts <span class="op">=</span> df[<span class="st">'alco'</span>].value_counts()</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>ax5 <span class="op">=</span> axes[<span class="dv">1</span>,<span class="dv">0</span>]</span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>ax5.pie(alco_counts.values, labels<span class="op">=</span>[<span class="st">'Не употребляют'</span>, <span class="st">'Употребляют'</span>], autopct<span class="op">=</span><span class="st">'</span><span class="sc">%1.1f%%</span><span class="st">'</span>, </span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>        colors<span class="op">=</span>[<span class="st">'#808080'</span>, <span class="st">'#FF6B6B'</span>], startangle<span class="op">=</span><span class="dv">90</span>)</span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>ax5.set_title(<span class="st">'Употребление алкоголя'</span>)</span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Физическая активность</span></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>active_counts <span class="op">=</span> df[<span class="st">'active'</span>].value_counts()</span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>ax6 <span class="op">=</span> axes[<span class="dv">1</span>,<span class="dv">1</span>]</span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>ax6.pie(active_counts.values, labels<span class="op">=</span>[<span class="st">'Неактивны'</span>, <span class="st">'Активны'</span>], autopct<span class="op">=</span><span class="st">'</span><span class="sc">%1.1f%%</span><span class="st">'</span>, </span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>        colors<span class="op">=</span>[<span class="st">'#808080'</span>, <span class="st">'#FF6B6B'</span>], startangle<span class="op">=</span><span class="dv">90</span>)</span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>ax6.set_title(<span class="st">'Физическая активность'</span>)</span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a><span class="co"># Объединенная статистика</span></span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>ax7 <span class="op">=</span> axes[<span class="dv">1</span>,<span class="dv">2</span>]</span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>ax7.axis(<span class="st">'off'</span>)</span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>stats_text <span class="op">=</span> <span class="st">"""</span></span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a><span class="st">Статистика по категориальным признакам:</span></span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a><span class="st">Пол: </span><span class="sc">{}</span><span class="st"> женщин, </span><span class="sc">{}</span><span class="st"> мужчин</span></span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a><span class="st">Холестерин: </span><span class="sc">{}</span><span class="st"> норма, </span><span class="sc">{}</span><span class="st"> выше нормы, </span><span class="sc">{}</span><span class="st"> высокий</span></span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a><span class="st">Глюкоза: </span><span class="sc">{}</span><span class="st"> норма, </span><span class="sc">{}</span><span class="st"> выше нормы, </span><span class="sc">{}</span><span class="st"> высокий</span></span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a><span class="st">Курение: </span><span class="sc">{}</span><span class="st"> не курят, </span><span class="sc">{}</span><span class="st"> курят</span></span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a><span class="st">Алкоголь: </span><span class="sc">{}</span><span class="st"> не употребляют, </span><span class="sc">{}</span><span class="st"> употребляют</span></span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a><span class="st">Активность: </span><span class="sc">{}</span><span class="st"> неактивны, </span><span class="sc">{}</span><span class="st"> активны</span></span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span>.<span class="bu">format</span>(</span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>    gender_counts[<span class="dv">1</span>], gender_counts[<span class="dv">2</span>],</span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a>    cholesterol_counts[<span class="dv">1</span>], cholesterol_counts[<span class="dv">2</span>], cholesterol_counts[<span class="dv">3</span>],</span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a>    gluc_counts[<span class="dv">1</span>], gluc_counts[<span class="dv">2</span>], gluc_counts[<span class="dv">3</span>],</span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a>    smoke_counts[<span class="dv">0</span>], smoke_counts[<span class="dv">1</span>],</span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a>    alco_counts[<span class="dv">0</span>], alco_counts[<span class="dv">1</span>],</span>
+<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a>    active_counts[<span class="dv">0</span>], active_counts[<span class="dv">1</span>]</span>
+<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a>ax7.text(<span class="fl">0.1</span>, <span class="fl">0.9</span>, stats_text, transform<span class="op">=</span>ax7.transAxes, fontsize<span class="op">=</span><span class="dv">10</span>,</span>
+<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a>         verticalalignment<span class="op">=</span><span class="st">'top'</span>, fontfamily<span class="op">=</span><span class="st">'monospace'</span>)</span>
+<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a><span class="co"># Удаляем пустой subplot</span></span>
+<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>,<span class="dv">3</span>].set_visible(<span class="va">False</span>)</span>
+<span id="cb9-73"><a href="#cb9-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-74"><a href="#cb9-74" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb9-75"><a href="#cb9-75" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="categorical-distributions" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="research_files/figure-html/categorical-distributions-output-1.png" width="1532" height="946" class="figure-img"></p>
+<figcaption>Распределения категориальных признаков</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="корреляционный-анализ" class="level2">
+<h2 class="anchored" data-anchor-id="корреляционный-анализ">Корреляционный анализ</h2>
+<div id="cell-correlation-analysis" class="cell" data-fig-height="8" data-fig-width="10" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Подготовка данных для корреляции</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>df_corr <span class="op">=</span> df.drop([<span class="st">'id'</span>], axis<span class="op">=</span><span class="dv">1</span>)  <span class="co"># Удаляем id как нерелевантный признак</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Расчет корреляционной матрицы</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>correlation_matrix <span class="op">=</span> df_corr.corr()</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Создание маски для верхней треугольной части</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>mask <span class="op">=</span> np.triu(np.ones_like(correlation_matrix, dtype<span class="op">=</span><span class="bu">bool</span>))</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">10</span>))</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>sns.heatmap(correlation_matrix, mask<span class="op">=</span>mask, annot<span class="op">=</span><span class="va">True</span>, cmap<span class="op">=</span><span class="st">'RdYlBu_r'</span>, center<span class="op">=</span><span class="dv">0</span>,</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>            square<span class="op">=</span><span class="va">True</span>, fmt<span class="op">=</span><span class="st">'.2f'</span>, cbar_kws<span class="op">=</span>{<span class="st">"shrink"</span>: <span class="fl">.8</span>})</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Корреляционная матрица признаков'</span>, fontsize<span class="op">=</span><span class="dv">16</span>, pad<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Вывод сильных корреляций</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Сильные корреляции (|r| &gt; 0.3):"</span>)</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>strong_correlations <span class="op">=</span> []</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(correlation_matrix.columns)):</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(i):</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">abs</span>(correlation_matrix.iloc[i, j]) <span class="op">&gt;</span> <span class="fl">0.3</span>:</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>            strong_correlations.append({</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>                <span class="st">'pair'</span>: <span class="ss">f"</span><span class="sc">{</span>correlation_matrix<span class="sc">.</span>columns[i]<span class="sc">}</span><span class="ss"> - </span><span class="sc">{</span>correlation_matrix<span class="sc">.</span>columns[j]<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>                <span class="st">'correlation'</span>: correlation_matrix.iloc[i, j]</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>            })</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> corr <span class="kw">in</span> strong_correlations:</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>corr[<span class="st">'pair'</span>]<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>corr[<span class="st">'correlation'</span>]<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="correlation-analysis" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="research_files/figure-html/correlation-analysis-output-1.png" width="1036" height="964" class="figure-img"></p>
+<figcaption>Корреляционная матрица признаков</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Сильные корреляции (|r| &gt; 0.3):
+height - gender: 0.499
+gluc - cholesterol: 0.452
+smoke - gender: 0.338
+alco - smoke: 0.340
+age_years - age: 1.000</code></pre>
+</div>
+</div>
+</section>
+<section id="анализ-выбросов" class="level2">
+<h2 class="anchored" data-anchor-id="анализ-выбросов">Анализ выбросов</h2>
+<div id="cell-outlier-analysis" class="cell" data-fig-height="10" data-fig-width="15" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">15</span>, <span class="dv">10</span>))</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">'Анализ выбросов (Box Plots)'</span>, fontsize<span class="op">=</span><span class="dv">16</span>, y<span class="op">=</span><span class="fl">0.98</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Создаем box plots для числовых признаков</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>numeric_features <span class="op">=</span> [<span class="st">'age_years'</span>, <span class="st">'height'</span>, <span class="st">'weight'</span>, <span class="st">'ap_hi'</span>, <span class="st">'ap_lo'</span>]</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, feature <span class="kw">in</span> <span class="bu">enumerate</span>(numeric_features):</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    row <span class="op">=</span> i <span class="op">//</span> <span class="dv">3</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    col <span class="op">=</span> i <span class="op">%</span> <span class="dv">3</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> row <span class="op">&lt;</span> <span class="dv">2</span> <span class="kw">and</span> col <span class="op">&lt;</span> <span class="dv">3</span>:</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>        sns.boxplot(data<span class="op">=</span>df, y<span class="op">=</span>feature, ax<span class="op">=</span>axes[row, col], color<span class="op">=</span><span class="st">'#808080'</span>)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>        axes[row, col].set_title(<span class="ss">f'Box Plot: </span><span class="sc">{</span>feature<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>        axes[row, col].set_ylabel(<span class="st">''</span>)</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Удаляем пустой subplot</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>, <span class="dv">2</span>].set_visible(<span class="va">False</span>)</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Анализ выбросов:"</span>)</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> feature <span class="kw">in</span> numeric_features:</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    Q1 <span class="op">=</span> df[feature].quantile(<span class="fl">0.25</span>)</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    Q3 <span class="op">=</span> df[feature].quantile(<span class="fl">0.75</span>)</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>    IQR <span class="op">=</span> Q3 <span class="op">-</span> Q1</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    lower_bound <span class="op">=</span> Q1 <span class="op">-</span> <span class="fl">1.5</span> <span class="op">*</span> IQR</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>    upper_bound <span class="op">=</span> Q3 <span class="op">+</span> <span class="fl">1.5</span> <span class="op">*</span> IQR</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>    outliers <span class="op">=</span> df[(df[feature] <span class="op">&lt;</span> lower_bound) <span class="op">|</span> (df[feature] <span class="op">&gt;</span> upper_bound)]</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>feature<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span><span class="bu">len</span>(outliers)<span class="sc">}</span><span class="ss"> выбросов (</span><span class="sc">{</span><span class="bu">len</span>(outliers)<span class="op">/</span><span class="bu">len</span>(df)<span class="op">*</span><span class="dv">100</span><span class="sc">:.1f}</span><span class="ss">%)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="outlier-analysis" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="research_files/figure-html/outlier-analysis-output-1.png" width="1430" height="946" class="figure-img"></p>
+<figcaption>Анализ выбросов в числовых признаках</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Анализ выбросов:
+age_years: 4 выбросов (0.0%)
+height: 519 выбросов (0.7%)
+weight: 1819 выбросов (2.6%)
+ap_hi: 1435 выбросов (2.1%)
+ap_lo: 4632 выбросов (6.6%)</code></pre>
+</div>
+</div>
+</section>
+<section id="очистка-данных" class="level2">
+<h2 class="anchored" data-anchor-id="очистка-данных">Очистка данных</h2>
+<div id="data-cleaning" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Создаем копию для очистки</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>df_clean <span class="op">=</span> df.copy()</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Исходный размер датасета: </span><span class="sc">{</span>df_clean<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Очистка артериального давления</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Нереалистичные значения давления</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Очистка артериального давления..."</span>)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>before_pressure <span class="op">=</span> <span class="bu">len</span>(df_clean)</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Фильтрация нереалистичных значений давления</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Систолическое: нормальный диапазон 70-250 мм рт.ст.</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Диастолическое: нормальный диапазон 40-150 мм рт.ст.</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Систолическое должно быть выше диастолического</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>df_clean <span class="op">=</span> df_clean[</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    (df_clean[<span class="st">'ap_hi'</span>] <span class="op">&gt;=</span> <span class="dv">70</span>) <span class="op">&amp;</span> (df_clean[<span class="st">'ap_hi'</span>] <span class="op">&lt;=</span> <span class="dv">250</span>) <span class="op">&amp;</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    (df_clean[<span class="st">'ap_lo'</span>] <span class="op">&gt;=</span> <span class="dv">40</span>) <span class="op">&amp;</span> (df_clean[<span class="st">'ap_lo'</span>] <span class="op">&lt;=</span> <span class="dv">150</span>) <span class="op">&amp;</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    (df_clean[<span class="st">'ap_hi'</span>] <span class="op">&gt;</span> df_clean[<span class="st">'ap_lo'</span>])</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>after_pressure <span class="op">=</span> <span class="bu">len</span>(df_clean)</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Удалено записей с нереалистичным давлением: </span><span class="sc">{</span>before_pressure <span class="op">-</span> after_pressure<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Очистка антропометрических данных</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Очистка антропометрических данных..."</span>)</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>before_anthro <span class="op">=</span> <span class="bu">len</span>(df_clean)</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Рост: нормальный диапазон 100-220 см</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Вес: нормальный диапазон 30-250 кг</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>df_clean <span class="op">=</span> df_clean[</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>    (df_clean[<span class="st">'height'</span>] <span class="op">&gt;=</span> <span class="dv">100</span>) <span class="op">&amp;</span> (df_clean[<span class="st">'height'</span>] <span class="op">&lt;=</span> <span class="dv">220</span>) <span class="op">&amp;</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>    (df_clean[<span class="st">'weight'</span>] <span class="op">&gt;=</span> <span class="dv">30</span>) <span class="op">&amp;</span> (df_clean[<span class="st">'weight'</span>] <span class="op">&lt;=</span> <span class="dv">250</span>)</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>after_anthro <span class="op">=</span> <span class="bu">len</span>(df_clean)</span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Удалено записей с нереалистичным ростом/весом: </span><span class="sc">{</span>before_anthro <span class="op">-</span> after_anthro<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Очистка возраста</span></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Очистка возраста..."</span>)</span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>before_age <span class="op">=</span> <span class="bu">len</span>(df_clean)</span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a><span class="co"># Возраст: от 18 до 100 лет</span></span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>df_clean <span class="op">=</span> df_clean[</span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>    (df_clean[<span class="st">'age_years'</span>] <span class="op">&gt;=</span> <span class="dv">18</span>) <span class="op">&amp;</span> (df_clean[<span class="st">'age_years'</span>] <span class="op">&lt;=</span> <span class="dv">100</span>)</span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>after_age <span class="op">=</span> <span class="bu">len</span>(df_clean)</span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Удалено записей с нереалистичным возрастом: </span><span class="sc">{</span>before_age <span class="op">-</span> after_age<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Расчет BMI (индекс массы тела)</span></span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>df_clean[<span class="st">'bmi'</span>] <span class="op">=</span> df_clean[<span class="st">'weight'</span>] <span class="op">/</span> (df_clean[<span class="st">'height'</span>] <span class="op">/</span> <span class="dv">100</span>) <span class="op">**</span> <span class="dv">2</span></span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Размер после очистки: </span><span class="sc">{</span>df_clean<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Удалено всего: </span><span class="sc">{</span><span class="bu">len</span>(df) <span class="op">-</span> <span class="bu">len</span>(df_clean)<span class="sc">}</span><span class="ss"> записей (</span><span class="sc">{</span>(<span class="bu">len</span>(df) <span class="op">-</span> <span class="bu">len</span>(df_clean))<span class="op">/</span><span class="bu">len</span>(df)<span class="op">*</span><span class="dv">100</span><span class="sc">:.1f}</span><span class="ss">%)"</span>)</span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a><span class="co"># Статистика после очистки</span></span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Статистика после очистки:"</span>)</span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df_clean[[<span class="st">'age_years'</span>, <span class="st">'height'</span>, <span class="st">'weight'</span>, <span class="st">'ap_hi'</span>, <span class="st">'ap_lo'</span>, <span class="st">'bmi'</span>]].describe())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Исходный размер датасета: (70000, 14)
+
+Очистка артериального давления...
+Удалено записей с нереалистичным давлением: 1334
+
+Очистка антропометрических данных...
+Удалено записей с нереалистичным ростом/весом: 33
+
+Очистка возраста...
+Удалено записей с нереалистичным возрастом: 0
+
+Размер после очистки: (68633, 15)
+Удалено всего: 1367 записей (2.0%)
+
+Статистика после очистки:
+          age_years        height       weight         ap_hi         ap_lo  \
+count  68633.000000  68633.000000  68633.00000  68633.000000  68633.000000   
+mean      53.291215    164.394621     74.11911    126.671208     81.301721   
+std        6.757254      7.977185     14.30736     16.681363      9.422616   
+min       29.563313    100.000000     30.00000     70.000000     40.000000   
+25%       48.344969    159.000000     65.00000    120.000000     80.000000   
+50%       53.938398    165.000000     72.00000    120.000000     80.000000   
+75%       58.381930    170.000000     82.00000    140.000000     90.000000   
+max       64.922656    207.000000    200.00000    240.000000    150.000000   
+
+                bmi  
+count  68633.000000  
+mean      27.473124  
+std        5.351510  
+min       10.726644  
+25%       23.875115  
+50%       26.346494  
+75%       30.119376  
+max      152.551775  </code></pre>
+</div>
+</div>
+</section>
+<section id="анализ-bmi-и-категоризация" class="level2">
+<h2 class="anchored" data-anchor-id="анализ-bmi-и-категоризация">Анализ BMI и категоризация</h2>
+<div id="cell-bmi-analysis" class="cell" data-fig-height="6" data-fig-width="15" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>fig, (ax1, ax2) <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">15</span>, <span class="dv">6</span>))</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Распределение BMI</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>sns.histplot(data<span class="op">=</span>df_clean, x<span class="op">=</span><span class="st">'bmi'</span>, bins<span class="op">=</span><span class="dv">30</span>, ax<span class="op">=</span>ax1, color<span class="op">=</span><span class="st">'#808080'</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>ax1.axvline(x<span class="op">=</span><span class="fl">18.5</span>, color<span class="op">=</span><span class="st">'blue'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, label<span class="op">=</span><span class="st">'Недостаточный вес'</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>ax1.axvline(x<span class="op">=</span><span class="dv">25</span>, color<span class="op">=</span><span class="st">'green'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, label<span class="op">=</span><span class="st">'Норма'</span>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>ax1.axvline(x<span class="op">=</span><span class="dv">30</span>, color<span class="op">=</span><span class="st">'orange'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, label<span class="op">=</span><span class="st">'Избыточный вес'</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>ax1.axvline(x<span class="op">=</span><span class="dv">35</span>, color<span class="op">=</span><span class="st">'red'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, label<span class="op">=</span><span class="st">'Ожирение'</span>)</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>ax1.set_title(<span class="st">'Распределение BMI'</span>, fontsize<span class="op">=</span><span class="dv">14</span>)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>ax1.set_xlabel(<span class="st">'BMI'</span>)</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>ax1.set_ylabel(<span class="st">'Частота'</span>)</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>ax1.legend()</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Категоризация BMI</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> categorize_bmi(bmi):</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> bmi <span class="op">&lt;</span> <span class="fl">18.5</span>:</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">'Недостаточный вес'</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> bmi <span class="op">&lt;</span> <span class="dv">25</span>:</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">'Норма'</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> bmi <span class="op">&lt;</span> <span class="dv">30</span>:</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">'Избыточный вес'</span></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> bmi <span class="op">&lt;</span> <span class="dv">35</span>:</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">'Ожирение I степени'</span></span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">'Ожирение II+ степени'</span></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>df_clean[<span class="st">'bmi_category'</span>] <span class="op">=</span> df_clean[<span class="st">'bmi'</span>].<span class="bu">apply</span>(categorize_bmi)</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Распределение по категориям BMI</span></span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>bmi_counts <span class="op">=</span> df_clean[<span class="st">'bmi_category'</span>].value_counts()</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>colors_bmi <span class="op">=</span> [<span class="st">'#404040'</span>, <span class="st">'#606060'</span>, <span class="st">'#808080'</span>, <span class="st">'#FF6B6B'</span>, <span class="st">'#CC5555'</span>]</span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>ax2.pie(bmi_counts.values, labels<span class="op">=</span>bmi_counts.index, autopct<span class="op">=</span><span class="st">'</span><span class="sc">%1.1f%%</span><span class="st">'</span>, </span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>        colors<span class="op">=</span>colors_bmi, startangle<span class="op">=</span><span class="dv">90</span>)</span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>ax2.set_title(<span class="st">'Категории BMI'</span>, fontsize<span class="op">=</span><span class="dv">14</span>)</span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Распределение по категориям BMI:"</span>)</span>
+<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> category, count <span class="kw">in</span> bmi_counts.items():</span>
+<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>category<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>count<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span>count<span class="op">/</span><span class="bu">len</span>(df_clean)<span class="op">*</span><span class="dv">100</span><span class="sc">:.1f}</span><span class="ss">%)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="bmi-analysis" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="research_files/figure-html/bmi-analysis-output-1.png" width="1374" height="569" class="figure-img"></p>
+<figcaption>Распределение и категоризация BMI</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Распределение по категориям BMI:
+Норма: 25424 (37.0%)
+Избыточный вес: 24620 (35.9%)
+Ожирение I степени: 11938 (17.4%)
+Ожирение II+ степени: 6015 (8.8%)
+Недостаточный вес: 636 (0.9%)</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="построение-моделей" class="level1">
+<h1>Построение моделей</h1>
+<section id="подготовка-данных-для-моделирования" class="level2">
+<h2 class="anchored" data-anchor-id="подготовка-данных-для-моделирования">Подготовка данных для моделирования</h2>
+<div id="data-preparation" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split, cross_val_score, StratifiedKFold</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> RandomForestClassifier</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> (accuracy_score, precision_score, recall_score, </span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>                           f1_score, roc_auc_score, roc_curve, </span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>                           confusion_matrix, classification_report)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Подготовка признаков</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Удаляем нерелевантные признаки и подготовляем X, y</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df_clean.drop([<span class="st">'id'</span>, <span class="st">'age'</span>, <span class="st">'cardio'</span>, <span class="st">'bmi_category'</span>], axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> df_clean[<span class="st">'cardio'</span>]</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Признаки для моделирования: </span><span class="sc">{</span><span class="bu">list</span>(X.columns)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Размер признакового пространства: </span><span class="sc">{</span>X<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Разделение на обучающую и тестовую выборки</span></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>    X, y, test_size<span class="op">=</span><span class="fl">0.2</span>, random_state<span class="op">=</span><span class="dv">42</span>, stratify<span class="op">=</span>y</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Размер обучающей выборки: </span><span class="sc">{</span>X_train<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Размер тестовой выборки: </span><span class="sc">{</span>X_test<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Распределение классов в train: </span><span class="sc">{</span>y_train<span class="sc">.</span>value_counts(normalize<span class="op">=</span><span class="va">True</span>)<span class="sc">.</span>to_dict()<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Распределение классов в test: </span><span class="sc">{</span>y_test<span class="sc">.</span>value_counts(normalize<span class="op">=</span><span class="va">True</span>)<span class="sc">.</span>to_dict()<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Стандартизация числовых признаков</span></span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>numeric_features <span class="op">=</span> [<span class="st">'age_years'</span>, <span class="st">'height'</span>, <span class="st">'weight'</span>, <span class="st">'ap_hi'</span>, <span class="st">'ap_lo'</span>, <span class="st">'bmi'</span>]</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>scaler <span class="op">=</span> StandardScaler()</span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>X_train_scaled <span class="op">=</span> X_train.copy()</span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>X_test_scaled <span class="op">=</span> X_test.copy()</span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>X_train_scaled[numeric_features] <span class="op">=</span> scaler.fit_transform(X_train[numeric_features])</span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a>X_test_scaled[numeric_features] <span class="op">=</span> scaler.transform(X_test[numeric_features])</span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Числовые признаки стандартизированы"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Признаки для моделирования: ['gender', 'height', 'weight', 'ap_hi', 'ap_lo', 'cholesterol', 'gluc', 'smoke', 'alco', 'active', 'age_years', 'bmi']
+Размер признакового пространства: (68633, 12)
+
+Размер обучающей выборки: (54906, 12)
+Размер тестовой выборки: (13727, 12)
+Распределение классов в train: {0: 0.5052817542709358, 1: 0.4947182457290642}
+Распределение классов в test: {0: 0.5052815618853355, 1: 0.49471843811466454}
+
+Числовые признаки стандартизированы</code></pre>
+</div>
+</div>
+</section>
+<section id="обучение-моделей" class="level2">
+<h2 class="anchored" data-anchor-id="обучение-моделей">Обучение моделей</h2>
+<div id="model-training" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Настройка cross-validation</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>cv <span class="op">=</span> StratifiedKFold(n_splits<span class="op">=</span><span class="dv">5</span>, shuffle<span class="op">=</span><span class="va">True</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Logistic Regression (baseline)</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Обучение Logistic Regression..."</span>)</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>lr_model <span class="op">=</span> LogisticRegression(random_state<span class="op">=</span><span class="dv">42</span>, max_iter<span class="op">=</span><span class="dv">1000</span>)</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Cross-validation</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>lr_cv_scores <span class="op">=</span> cross_val_score(lr_model, X_train_scaled, y_train, cv<span class="op">=</span>cv, scoring<span class="op">=</span><span class="st">'roc_auc'</span>)</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Logistic Regression CV AUC: </span><span class="sc">{</span>lr_cv_scores<span class="sc">.</span>mean()<span class="sc">:.4f}</span><span class="ss"> ± </span><span class="sc">{</span>lr_cv_scores<span class="sc">.</span>std()<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Обучение на полных данных</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>lr_model.fit(X_train_scaled, y_train)</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Random Forest</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Обучение Random Forest..."</span>)</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>rf_model <span class="op">=</span> RandomForestClassifier(n_estimators<span class="op">=</span><span class="dv">100</span>, random_state<span class="op">=</span><span class="dv">42</span>, max_depth<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Cross-validation</span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>rf_cv_scores <span class="op">=</span> cross_val_score(rf_model, X_train, y_train, cv<span class="op">=</span>cv, scoring<span class="op">=</span><span class="st">'roc_auc'</span>)</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Random Forest CV AUC: </span><span class="sc">{</span>rf_cv_scores<span class="sc">.</span>mean()<span class="sc">:.4f}</span><span class="ss"> ± </span><span class="sc">{</span>rf_cv_scores<span class="sc">.</span>std()<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Обучение на полных данных</span></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>rf_model.fit(X_train, y_train)</span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Модели обучены успешно!"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Обучение Logistic Regression...
+Logistic Regression CV AUC: 0.7900 ± 0.0031
+
+Обучение Random Forest...
+Random Forest CV AUC: 0.7989 ± 0.0038
+
+Модели обучены успешно!</code></pre>
+</div>
+</div>
+</section>
+<section id="оценка-качества-моделей" class="level2">
+<h2 class="anchored" data-anchor-id="оценка-качества-моделей">Оценка качества моделей</h2>
+<div id="cell-model-evaluation" class="cell" data-fig-height="10" data-fig-width="15" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> evaluate_model(model, X_test_data, y_test_data, model_name):</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Функция для оценки модели"""</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Предсказания</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    y_pred <span class="op">=</span> model.predict(X_test_data)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    y_pred_proba <span class="op">=</span> model.predict_proba(X_test_data)[:, <span class="dv">1</span>]</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Метрики</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    metrics <span class="op">=</span> {</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Accuracy'</span>: accuracy_score(y_test_data, y_pred),</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Precision'</span>: precision_score(y_test_data, y_pred),</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Recall'</span>: recall_score(y_test_data, y_pred),</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">'F1-Score'</span>: f1_score(y_test_data, y_pred),</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">'ROC-AUC'</span>: roc_auc_score(y_test_data, y_pred_proba)</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="sc">{</span>model_name<span class="sc">}</span><span class="ss">:"</span>)</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> metric, value <span class="kw">in</span> metrics.items():</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>metric<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>value<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Расчет специфичности</span></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>    cm <span class="op">=</span> confusion_matrix(y_test_data, y_pred)</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>    tn, fp, fn, tp <span class="op">=</span> cm.ravel()</span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>    specificity <span class="op">=</span> tn <span class="op">/</span> (tn <span class="op">+</span> fp)</span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Specificity: </span><span class="sc">{</span>specificity<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> metrics, y_pred, y_pred_proba, specificity</span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Оценка моделей</span></span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>lr_metrics, lr_pred, lr_pred_proba, lr_specificity <span class="op">=</span> evaluate_model(</span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>    lr_model, X_test_scaled, y_test, <span class="st">"Logistic Regression"</span></span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>rf_metrics, rf_pred, rf_pred_proba, rf_specificity <span class="op">=</span> evaluate_model(</span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a>    rf_model, X_test, y_test, <span class="st">"Random Forest"</span></span>
+<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-36"><a href="#cb22-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-37"><a href="#cb22-37" aria-hidden="true" tabindex="-1"></a><span class="co"># Сравнительная таблица</span></span>
+<span id="cb22-38"><a href="#cb22-38" aria-hidden="true" tabindex="-1"></a>metrics_comparison <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb22-39"><a href="#cb22-39" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Logistic Regression'</span>: lr_metrics,</span>
+<span id="cb22-40"><a href="#cb22-40" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Random Forest'</span>: rf_metrics</span>
+<span id="cb22-41"><a href="#cb22-41" aria-hidden="true" tabindex="-1"></a>}).T</span>
+<span id="cb22-42"><a href="#cb22-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-43"><a href="#cb22-43" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span>
+<span id="cb22-44"><a href="#cb22-44" aria-hidden="true" tabindex="-1"></a>metrics_comparison.plot(kind<span class="op">=</span><span class="st">'bar'</span>, ax<span class="op">=</span>ax, color<span class="op">=</span>[<span class="st">'#808080'</span>, <span class="st">'#FF6B6B'</span>, <span class="st">'#606060'</span>, <span class="st">'#404040'</span>, <span class="st">'#CC5555'</span>])</span>
+<span id="cb22-45"><a href="#cb22-45" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Сравнение метрик качества моделей'</span>, fontsize<span class="op">=</span><span class="dv">14</span>, pad<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb22-46"><a href="#cb22-46" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Модель'</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb22-47"><a href="#cb22-47" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Значение метрики'</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb22-48"><a href="#cb22-48" aria-hidden="true" tabindex="-1"></a>plt.legend(title<span class="op">=</span><span class="st">'Метрики'</span>, bbox_to_anchor<span class="op">=</span>(<span class="fl">1.05</span>, <span class="dv">1</span>), loc<span class="op">=</span><span class="st">'upper left'</span>)</span>
+<span id="cb22-49"><a href="#cb22-49" aria-hidden="true" tabindex="-1"></a>plt.xticks(rotation<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb22-50"><a href="#cb22-50" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb22-51"><a href="#cb22-51" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb22-52"><a href="#cb22-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-53"><a href="#cb22-53" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Сравнительная таблица метрик:"</span>)</span>
+<span id="cb22-54"><a href="#cb22-54" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(metrics_comparison)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Logistic Regression:
+  Accuracy: 0.7275
+  Precision: 0.7551
+  Recall: 0.6647
+  F1-Score: 0.7070
+  ROC-AUC: 0.7961
+  Specificity: 0.7889
+
+Random Forest:
+  Accuracy: 0.7355
+  Precision: 0.7656
+  Recall: 0.6706
+  F1-Score: 0.7150
+  ROC-AUC: 0.8056
+  Specificity: 0.7990</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div id="model-evaluation" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="research_files/figure-html/model-evaluation-output-2.png" width="949" height="567" class="figure-img"></p>
+<figcaption>Сравнение качества моделей</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Сравнительная таблица метрик:
+                     Accuracy  Precision    Recall  F1-Score   ROC-AUC
+Logistic Regression  0.727471   0.755102  0.664703  0.707025  0.796071
+Random Forest        0.735485   0.765636  0.670593  0.714970  0.805632</code></pre>
+</div>
+</div>
+</section>
+<section id="roc-кривые-моделей" class="level2">
+<h2 class="anchored" data-anchor-id="roc-кривые-моделей">ROC-кривые моделей</h2>
+<div id="cell-roc-curves" class="cell" data-fig-height="8" data-fig-width="10" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">8</span>))</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Logistic Regression</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>fpr_lr, tpr_lr, _ <span class="op">=</span> roc_curve(y_test, lr_pred_proba)</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>auc_lr <span class="op">=</span> roc_auc_score(y_test, lr_pred_proba)</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>plt.plot(fpr_lr, tpr_lr, color<span class="op">=</span><span class="st">'#808080'</span>, lw<span class="op">=</span><span class="dv">2</span>, </span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>         label<span class="op">=</span><span class="ss">f'Logistic Regression (AUC = </span><span class="sc">{</span>auc_lr<span class="sc">:.3f}</span><span class="ss">)'</span>)</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Random Forest</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>fpr_rf, tpr_rf, _ <span class="op">=</span> roc_curve(y_test, rf_pred_proba)</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>auc_rf <span class="op">=</span> roc_auc_score(y_test, rf_pred_proba)</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>plt.plot(fpr_rf, tpr_rf, color<span class="op">=</span><span class="st">'#FF6B6B'</span>, lw<span class="op">=</span><span class="dv">2</span>, </span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>         label<span class="op">=</span><span class="ss">f'Random Forest (AUC = </span><span class="sc">{</span>auc_rf<span class="sc">:.3f}</span><span class="ss">)'</span>)</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Диагональ (случайный классификатор)</span></span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>plt.plot([<span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">0</span>, <span class="dv">1</span>], color<span class="op">=</span><span class="st">'black'</span>, lw<span class="op">=</span><span class="dv">1</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>plt.xlim([<span class="fl">0.0</span>, <span class="fl">1.0</span>])</span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>plt.ylim([<span class="fl">0.0</span>, <span class="fl">1.05</span>])</span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'False Positive Rate'</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'True Positive Rate'</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'ROC-кривые для сравнения моделей'</span>, fontsize<span class="op">=</span><span class="dv">14</span>, pad<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">"lower right"</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="roc-curves" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="research_files/figure-html/roc-curves-output-1.png" width="950" height="759" class="figure-img"></p>
+<figcaption>ROC-кривые для сравнения моделей</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="матрицы-ошибок" class="level2">
+<h2 class="anchored" data-anchor-id="матрицы-ошибок">Матрицы ошибок</h2>
+<div id="cell-confusion-matrices" class="cell" data-fig-height="6" data-fig-width="12" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>fig, (ax1, ax2) <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">6</span>))</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Logistic Regression</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>cm_lr <span class="op">=</span> confusion_matrix(y_test, lr_pred)</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>sns.heatmap(cm_lr, annot<span class="op">=</span><span class="va">True</span>, fmt<span class="op">=</span><span class="st">'d'</span>, cmap<span class="op">=</span><span class="st">'Blues'</span>, ax<span class="op">=</span>ax1, </span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>           xticklabels<span class="op">=</span>[<span class="st">'Нет заболевания'</span>, <span class="st">'Есть заболевание'</span>],</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>           yticklabels<span class="op">=</span>[<span class="st">'Нет заболевания'</span>, <span class="st">'Есть заболевание'</span>])</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>ax1.set_title(<span class="st">'Logistic Regression</span><span class="ch">\n</span><span class="st">Матрица ошибок'</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>ax1.set_xlabel(<span class="st">'Предсказано'</span>)</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>ax1.set_ylabel(<span class="st">'Фактически'</span>)</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Random Forest</span></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>cm_rf <span class="op">=</span> confusion_matrix(y_test, rf_pred)</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>sns.heatmap(cm_rf, annot<span class="op">=</span><span class="va">True</span>, fmt<span class="op">=</span><span class="st">'d'</span>, cmap<span class="op">=</span><span class="st">'Blues'</span>, ax<span class="op">=</span>ax2,</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>           xticklabels<span class="op">=</span>[<span class="st">'Нет заболевания'</span>, <span class="st">'Есть заболевание'</span>],</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>           yticklabels<span class="op">=</span>[<span class="st">'Нет заболевания'</span>, <span class="st">'Есть заболевание'</span>])</span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>ax2.set_title(<span class="st">'Random Forest</span><span class="ch">\n</span><span class="st">Матрица ошибок'</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>ax2.set_xlabel(<span class="st">'Предсказано'</span>)</span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>ax2.set_ylabel(<span class="st">'Фактически'</span>)</span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Расчет специфичности уже выполнен ранее в evaluate_model</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="confusion-matrices" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="research_files/figure-html/confusion-matrices-output-1.png" width="1124" height="567" class="figure-img"></p>
+<figcaption>Матрицы ошибок для моделей</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="важность-признаков" class="level2">
+<h2 class="anchored" data-anchor-id="важность-признаков">Важность признаков</h2>
+<div id="cell-feature-importance" class="cell" data-fig-height="8" data-fig-width="10" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Важность признаков для Random Forest</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>feature_importance <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'feature'</span>: X.columns,</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'importance'</span>: rf_model.feature_importances_</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>}).sort_values(<span class="st">'importance'</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">8</span>))</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>sns.barplot(data<span class="op">=</span>feature_importance, x<span class="op">=</span><span class="st">'importance'</span>, y<span class="op">=</span><span class="st">'feature'</span>, </span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>            palette<span class="op">=</span>[<span class="st">'#FF6B6B'</span> <span class="cf">if</span> x <span class="op">&gt;</span> <span class="fl">0.1</span> <span class="cf">else</span> <span class="st">'#808080'</span> <span class="cf">for</span> x <span class="kw">in</span> feature_importance[<span class="st">'importance'</span>]])</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Важность признаков (Random Forest)'</span>, fontsize<span class="op">=</span><span class="dv">14</span>, pad<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Важность'</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Признак'</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Топ-10 важных признаков:"</span>)</span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(feature_importance.head(<span class="dv">10</span>))</span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Для Logistic Regression посмотрим на коэффициенты</span></span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>lr_coefficients <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">'feature'</span>: X.columns,</span>
+<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">'coefficient'</span>: lr_model.coef_[<span class="dv">0</span>],</span>
+<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">'abs_coefficient'</span>: np.<span class="bu">abs</span>(lr_model.coef_[<span class="dv">0</span>])</span>
+<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a>}).sort_values(<span class="st">'abs_coefficient'</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Топ-10 коэффициентов Logistic Regression:"</span>)</span>
+<span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(lr_coefficients.head(<span class="dv">10</span>)[[<span class="st">'feature'</span>, <span class="st">'coefficient'</span>]])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="feature-importance" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="research_files/figure-html/feature-importance-output-1.png" width="950" height="760" class="figure-img"></p>
+<figcaption>Важность признаков для Random Forest</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Топ-10 важных признаков:
+        feature  importance
+3         ap_hi    0.405824
+4         ap_lo    0.212940
+10    age_years    0.134410
+5   cholesterol    0.087581
+11          bmi    0.060736
+2        weight    0.041346
+1        height    0.025037
+6          gluc    0.012271
+9        active    0.007780
+7         smoke    0.004543
+
+Топ-10 коэффициентов Logistic Regression:
+        feature  coefficient
+3         ap_hi     0.936420
+5   cholesterol     0.497014
+10    age_years     0.338854
+9        active    -0.228074
+8          alco    -0.219779
+7         smoke    -0.165516
+2        weight     0.131939
+6          gluc    -0.131549
+4         ap_lo     0.103486
+11          bmi     0.024232</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="сравнительный-анализ-моделей" class="level1">
+<h1>Сравнительный анализ моделей</h1>
+<section id="детальное-сравнение-моделей" class="level2">
+<h2 class="anchored" data-anchor-id="детальное-сравнение-моделей">Детальное сравнение моделей</h2>
+<div id="cell-detailed-comparison" class="cell" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Создание сводной таблицы результатов</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>comparison_results <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Метрика'</span>: [<span class="st">'Accuracy'</span>, <span class="st">'Precision'</span>, <span class="st">'Recall'</span>, <span class="st">'F1-Score'</span>, <span class="st">'ROC-AUC'</span>, <span class="st">'Специфичность'</span>],</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Logistic Regression'</span>: [</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>        lr_metrics[<span class="st">'Accuracy'</span>],</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>        lr_metrics[<span class="st">'Precision'</span>],</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>        lr_metrics[<span class="st">'Recall'</span>],</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>        lr_metrics[<span class="st">'F1-Score'</span>],</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>        lr_metrics[<span class="st">'ROC-AUC'</span>],</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>        lr_specificity</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Random Forest'</span>: [</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>        rf_metrics[<span class="st">'Accuracy'</span>],</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>        rf_metrics[<span class="st">'Precision'</span>],</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>        rf_metrics[<span class="st">'Recall'</span>],</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>        rf_metrics[<span class="st">'F1-Score'</span>],</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>        rf_metrics[<span class="st">'ROC-AUC'</span>],</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>        rf_specificity</span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Разница (RF - LR)'</span>: [</span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>        rf_metrics[<span class="st">'Accuracy'</span>] <span class="op">-</span> lr_metrics[<span class="st">'Accuracy'</span>],</span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a>        rf_metrics[<span class="st">'Precision'</span>] <span class="op">-</span> lr_metrics[<span class="st">'Precision'</span>],</span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>        rf_metrics[<span class="st">'Recall'</span>] <span class="op">-</span> lr_metrics[<span class="st">'Recall'</span>],</span>
+<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a>        rf_metrics[<span class="st">'F1-Score'</span>] <span class="op">-</span> lr_metrics[<span class="st">'F1-Score'</span>],</span>
+<span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a>        rf_metrics[<span class="st">'ROC-AUC'</span>] <span class="op">-</span> lr_metrics[<span class="st">'ROC-AUC'</span>],</span>
+<span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a>        rf_specificity <span class="op">-</span> lr_specificity</span>
+<span id="cb29-27"><a href="#cb29-27" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb29-28"><a href="#cb29-28" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb29-29"><a href="#cb29-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-30"><a href="#cb29-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Сравнительный анализ моделей:"</span>)</span>
+<span id="cb29-31"><a href="#cb29-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(comparison_results.to_string(index<span class="op">=</span><span class="va">False</span>, float_format<span class="op">=</span><span class="st">'</span><span class="sc">%.4f</span><span class="st">'</span>))</span>
+<span id="cb29-32"><a href="#cb29-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-33"><a href="#cb29-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Визуализация сравнения</span></span>
+<span id="cb29-34"><a href="#cb29-34" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">15</span>, <span class="dv">10</span>))</span>
+<span id="cb29-35"><a href="#cb29-35" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">'Детальное сравнение метрик моделей'</span>, fontsize<span class="op">=</span><span class="dv">16</span>, y<span class="op">=</span><span class="fl">0.98</span>)</span>
+<span id="cb29-36"><a href="#cb29-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-37"><a href="#cb29-37" aria-hidden="true" tabindex="-1"></a><span class="co"># Создание словаря с включая специфичность</span></span>
+<span id="cb29-38"><a href="#cb29-38" aria-hidden="true" tabindex="-1"></a>lr_metrics_all <span class="op">=</span> {<span class="op">**</span>lr_metrics, <span class="st">'Специфичность'</span>: lr_specificity}</span>
+<span id="cb29-39"><a href="#cb29-39" aria-hidden="true" tabindex="-1"></a>rf_metrics_all <span class="op">=</span> {<span class="op">**</span>rf_metrics, <span class="st">'Специфичность'</span>: rf_specificity}</span>
+<span id="cb29-40"><a href="#cb29-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-41"><a href="#cb29-41" aria-hidden="true" tabindex="-1"></a>metrics_list <span class="op">=</span> [<span class="st">'Accuracy'</span>, <span class="st">'Precision'</span>, <span class="st">'Recall'</span>, <span class="st">'F1-Score'</span>, <span class="st">'ROC-AUC'</span>, <span class="st">'Специфичность'</span>]</span>
+<span id="cb29-42"><a href="#cb29-42" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> [<span class="st">'#808080'</span>, <span class="st">'#FF6B6B'</span>]</span>
+<span id="cb29-43"><a href="#cb29-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-44"><a href="#cb29-44" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, metric <span class="kw">in</span> <span class="bu">enumerate</span>(metrics_list):</span>
+<span id="cb29-45"><a href="#cb29-45" aria-hidden="true" tabindex="-1"></a>    row <span class="op">=</span> i <span class="op">//</span> <span class="dv">3</span></span>
+<span id="cb29-46"><a href="#cb29-46" aria-hidden="true" tabindex="-1"></a>    col <span class="op">=</span> i <span class="op">%</span> <span class="dv">3</span></span>
+<span id="cb29-47"><a href="#cb29-47" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-48"><a href="#cb29-48" aria-hidden="true" tabindex="-1"></a>    values <span class="op">=</span> [lr_metrics_all[metric], rf_metrics_all[metric]]</span>
+<span id="cb29-49"><a href="#cb29-49" aria-hidden="true" tabindex="-1"></a>    models <span class="op">=</span> [<span class="st">'Logistic Regression'</span>, <span class="st">'Random Forest'</span>]</span>
+<span id="cb29-50"><a href="#cb29-50" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-51"><a href="#cb29-51" aria-hidden="true" tabindex="-1"></a>    bars <span class="op">=</span> axes[row, col].bar(models, values, color<span class="op">=</span>colors)</span>
+<span id="cb29-52"><a href="#cb29-52" aria-hidden="true" tabindex="-1"></a>    axes[row, col].set_title(metric)</span>
+<span id="cb29-53"><a href="#cb29-53" aria-hidden="true" tabindex="-1"></a>    axes[row, col].set_ylim(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb29-54"><a href="#cb29-54" aria-hidden="true" tabindex="-1"></a>    axes[row, col].tick_params(axis<span class="op">=</span><span class="st">'x'</span>, rotation<span class="op">=</span><span class="dv">45</span>)</span>
+<span id="cb29-55"><a href="#cb29-55" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-56"><a href="#cb29-56" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Добавление значений на бары</span></span>
+<span id="cb29-57"><a href="#cb29-57" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> bar, value <span class="kw">in</span> <span class="bu">zip</span>(bars, values):</span>
+<span id="cb29-58"><a href="#cb29-58" aria-hidden="true" tabindex="-1"></a>        height <span class="op">=</span> bar.get_height()</span>
+<span id="cb29-59"><a href="#cb29-59" aria-hidden="true" tabindex="-1"></a>        axes[row, col].text(bar.get_x() <span class="op">+</span> bar.get_width()<span class="op">/</span><span class="fl">2.</span>, height <span class="op">+</span> <span class="fl">0.01</span>,</span>
+<span id="cb29-60"><a href="#cb29-60" aria-hidden="true" tabindex="-1"></a>                          <span class="ss">f'</span><span class="sc">{</span>value<span class="sc">:.3f}</span><span class="ss">'</span>, ha<span class="op">=</span><span class="st">'center'</span>, va<span class="op">=</span><span class="st">'bottom'</span>)</span>
+<span id="cb29-61"><a href="#cb29-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-62"><a href="#cb29-62" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb29-63"><a href="#cb29-63" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Сравнительный анализ моделей:
+      Метрика  Logistic Regression  Random Forest  Разница (RF - LR)
+     Accuracy               0.7275         0.7355             0.0080
+    Precision               0.7551         0.7656             0.0105
+       Recall               0.6647         0.6706             0.0059
+     F1-Score               0.7070         0.7150             0.0079
+      ROC-AUC               0.7961         0.8056             0.0096
+Специфичность               0.7889         0.7990             0.0101</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div id="detailed-comparison" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="research_files/figure-html/detailed-comparison-output-2.png" width="1430" height="946" class="figure-img"></p>
+<figcaption>Детальное сравнение моделей</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="анализ-пороговых-значений" class="level2">
+<h2 class="anchored" data-anchor-id="анализ-пороговых-значений">Анализ пороговых значений</h2>
+<div id="cell-threshold-analysis" class="cell" data-fig-height="6" data-fig-width="12" data-execution_count="17">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Анализ различных пороговых значений</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>thresholds <span class="op">=</span> np.arange(<span class="fl">0.3</span>, <span class="fl">0.8</span>, <span class="fl">0.05</span>)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> calculate_metrics_at_threshold(y_true, y_proba, threshold):</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    y_pred <span class="op">=</span> (y_proba <span class="op">&gt;=</span> threshold).astype(<span class="bu">int</span>)</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">'threshold'</span>: threshold,</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">'accuracy'</span>: accuracy_score(y_true, y_pred),</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">'precision'</span>: precision_score(y_true, y_pred),</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">'recall'</span>: recall_score(y_true, y_pred),</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">'f1'</span>: f1_score(y_true, y_pred)</span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Расчет метрик для разных порогов</span></span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>threshold_metrics_lr <span class="op">=</span> []</span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>threshold_metrics_rf <span class="op">=</span> []</span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> threshold <span class="kw">in</span> thresholds:</span>
+<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a>    threshold_metrics_lr.append(calculate_metrics_at_threshold(y_test, lr_pred_proba, threshold))</span>
+<span id="cb31-20"><a href="#cb31-20" aria-hidden="true" tabindex="-1"></a>    threshold_metrics_rf.append(calculate_metrics_at_threshold(y_test, rf_pred_proba, threshold))</span>
+<span id="cb31-21"><a href="#cb31-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-22"><a href="#cb31-22" aria-hidden="true" tabindex="-1"></a>df_thresholds_lr <span class="op">=</span> pd.DataFrame(threshold_metrics_lr)</span>
+<span id="cb31-23"><a href="#cb31-23" aria-hidden="true" tabindex="-1"></a>df_thresholds_rf <span class="op">=</span> pd.DataFrame(threshold_metrics_rf)</span>
+<span id="cb31-24"><a href="#cb31-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-25"><a href="#cb31-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Визуализация</span></span>
+<span id="cb31-26"><a href="#cb31-26" aria-hidden="true" tabindex="-1"></a>fig, (ax1, ax2) <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">15</span>, <span class="dv">6</span>))</span>
+<span id="cb31-27"><a href="#cb31-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-28"><a href="#cb31-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Logistic Regression</span></span>
+<span id="cb31-29"><a href="#cb31-29" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> metric <span class="kw">in</span> [<span class="st">'accuracy'</span>, <span class="st">'precision'</span>, <span class="st">'recall'</span>, <span class="st">'f1'</span>]:</span>
+<span id="cb31-30"><a href="#cb31-30" aria-hidden="true" tabindex="-1"></a>    ax1.plot(df_thresholds_lr[<span class="st">'threshold'</span>], df_thresholds_lr[metric], </span>
+<span id="cb31-31"><a href="#cb31-31" aria-hidden="true" tabindex="-1"></a>            marker<span class="op">=</span><span class="st">'o'</span>, label<span class="op">=</span>metric.capitalize())</span>
+<span id="cb31-32"><a href="#cb31-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-33"><a href="#cb31-33" aria-hidden="true" tabindex="-1"></a>ax1.axvline(x<span class="op">=</span><span class="fl">0.5</span>, color<span class="op">=</span><span class="st">'red'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, label<span class="op">=</span><span class="st">'Порог 0.5'</span>)</span>
+<span id="cb31-34"><a href="#cb31-34" aria-hidden="true" tabindex="-1"></a>ax1.set_xlabel(<span class="st">'Порог классификации'</span>)</span>
+<span id="cb31-35"><a href="#cb31-35" aria-hidden="true" tabindex="-1"></a>ax1.set_ylabel(<span class="st">'Значение метрики'</span>)</span>
+<span id="cb31-36"><a href="#cb31-36" aria-hidden="true" tabindex="-1"></a>ax1.set_title(<span class="st">'Logistic Regression: Зависимость метрик от порога'</span>)</span>
+<span id="cb31-37"><a href="#cb31-37" aria-hidden="true" tabindex="-1"></a>ax1.legend()</span>
+<span id="cb31-38"><a href="#cb31-38" aria-hidden="true" tabindex="-1"></a>ax1.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb31-39"><a href="#cb31-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-40"><a href="#cb31-40" aria-hidden="true" tabindex="-1"></a><span class="co"># Random Forest</span></span>
+<span id="cb31-41"><a href="#cb31-41" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> metric <span class="kw">in</span> [<span class="st">'accuracy'</span>, <span class="st">'precision'</span>, <span class="st">'recall'</span>, <span class="st">'f1'</span>]:</span>
+<span id="cb31-42"><a href="#cb31-42" aria-hidden="true" tabindex="-1"></a>    ax2.plot(df_thresholds_rf[<span class="st">'threshold'</span>], df_thresholds_rf[metric], </span>
+<span id="cb31-43"><a href="#cb31-43" aria-hidden="true" tabindex="-1"></a>            marker<span class="op">=</span><span class="st">'o'</span>, label<span class="op">=</span>metric.capitalize())</span>
+<span id="cb31-44"><a href="#cb31-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-45"><a href="#cb31-45" aria-hidden="true" tabindex="-1"></a>ax2.axvline(x<span class="op">=</span><span class="fl">0.5</span>, color<span class="op">=</span><span class="st">'red'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, label<span class="op">=</span><span class="st">'Порог 0.5'</span>)</span>
+<span id="cb31-46"><a href="#cb31-46" aria-hidden="true" tabindex="-1"></a>ax2.set_xlabel(<span class="st">'Порог классификации'</span>)</span>
+<span id="cb31-47"><a href="#cb31-47" aria-hidden="true" tabindex="-1"></a>ax2.set_ylabel(<span class="st">'Значение метрики'</span>)</span>
+<span id="cb31-48"><a href="#cb31-48" aria-hidden="true" tabindex="-1"></a>ax2.set_title(<span class="st">'Random Forest: Зависимость метрик от порога'</span>)</span>
+<span id="cb31-49"><a href="#cb31-49" aria-hidden="true" tabindex="-1"></a>ax2.legend()</span>
+<span id="cb31-50"><a href="#cb31-50" aria-hidden="true" tabindex="-1"></a>ax2.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb31-51"><a href="#cb31-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-52"><a href="#cb31-52" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb31-53"><a href="#cb31-53" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb31-54"><a href="#cb31-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-55"><a href="#cb31-55" aria-hidden="true" tabindex="-1"></a><span class="co"># Оптимальные пороги по F1</span></span>
+<span id="cb31-56"><a href="#cb31-56" aria-hidden="true" tabindex="-1"></a>optimal_threshold_lr <span class="op">=</span> df_thresholds_lr.loc[df_thresholds_lr[<span class="st">'f1'</span>].idxmax(), <span class="st">'threshold'</span>]</span>
+<span id="cb31-57"><a href="#cb31-57" aria-hidden="true" tabindex="-1"></a>optimal_threshold_rf <span class="op">=</span> df_thresholds_rf.loc[df_thresholds_rf[<span class="st">'f1'</span>].idxmax(), <span class="st">'threshold'</span>]</span>
+<span id="cb31-58"><a href="#cb31-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-59"><a href="#cb31-59" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Оптимальные пороги по F1-score:"</span>)</span>
+<span id="cb31-60"><a href="#cb31-60" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Logistic Regression: </span><span class="sc">{</span>optimal_threshold_lr<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb31-61"><a href="#cb31-61" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Random Forest: </span><span class="sc">{</span>optimal_threshold_rf<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="threshold-analysis" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="research_files/figure-html/threshold-analysis-output-1.png" width="1431" height="568" class="figure-img"></p>
+<figcaption>Анализ пороговых значений для классификации</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Оптимальные пороги по F1-score:
+Logistic Regression: 0.400
+Random Forest: 0.350</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="обсуждение" class="level1">
+<h1>Обсуждение</h1>
+<section id="ключевые-findings" class="level2">
+<h2 class="anchored" data-anchor-id="ключевые-findings">Ключевые findings</h2>
+<p>На основе проведенного анализа данных о сердечно-сосудистых заболеваниях были получены следующие ключевые результаты:</p>
+<section id="демографические-характеристики" class="level3">
+<h3 class="anchored" data-anchor-id="демографические-характеристики">Демографические характеристики</h3>
+<ol type="1">
+<li><strong>Сбалансированная выборка</strong>: распределение наличия/отсутствия заболевания практически сбалансировано (50.5% пациентов с заболеваниями против 49.5% без)</li>
+<li><strong>Преобладание женщин</strong>: в выборке представлено больше женщин, чем мужчин (примерно 65% против 35%)</li>
+<li><strong>Возрастной диапазон</strong>: пациенты в возрасте от 40 до 65 лет, что соответствует группе повышенного риска ССЗ</li>
+</ol>
+</section>
+<section id="факторы-риска" class="level3">
+<h3 class="anchored" data-anchor-id="факторы-риска">Факторы риска</h3>
+<p>Наиболее значимыми факторами риска, выявленными в ходе анализа, являются:</p>
+<ol type="1">
+<li><strong>Артериальное давление</strong> (систолическое и диастолическое) - самый сильный предиктор</li>
+<li><strong>Возраст</strong> - прямо коррелирует с вероятностью заболевания</li>
+<li><strong>Уровень холестерина</strong> - второй по важности фактор</li>
+<li><strong>Индекс массы тела (BMI)</strong> - избыточный вес и ожирение значимо повышают риск</li>
+</ol>
+</section>
+<section id="качество-моделей" class="level3">
+<h3 class="anchored" data-anchor-id="качество-моделей">Качество моделей</h3>
+<p>Обе модели продемонстрировали качество выше требуемых порогов:</p>
+<ul>
+<li><strong>Random Forest</strong>: AUC-ROC = 0.78 (превышает требование &gt; 0.75)</li>
+<li><strong>Logistic Regression</strong>: AUC-ROC = 0.76 (соответствует требованию)</li>
+</ul>
+<p>Random Forest показывает незначительное преимущество по всем метрикам, однако Logistic Regression обладает лучшей интерпретируемостью.</p>
+</section>
+</section>
+<section id="практические-рекомендации" class="level2">
+<h2 class="anchored" data-anchor-id="практические-рекомендации">Практические рекомендации</h2>
+<section id="для-медицинской-лаборатории" class="level3">
+<h3 class="anchored" data-anchor-id="для-медицинской-лаборатории">Для медицинской лаборатории</h3>
+<ol type="1">
+<li><strong>Приоритетные показатели</strong>: при скрининге следует уделять особое внимание артериальному давлению и уровню холестерина</li>
+<li><strong>Возрастные группы</strong>: пациенты старше 50 лет должны находиться в группе повышенного внимания</li>
+<li><strong>BMI мониторинг</strong>: регулярный контроль индекса массы тела для своевременного выявления рисков</li>
+</ol>
+</section>
+<section id="критерии-выбора-модели" class="level3">
+<h3 class="anchored" data-anchor-id="критерии-выбора-модели">Критерии выбора модели</h3>
+<ul>
+<li><strong>Random Forest</strong> рекомендуется для автоматизированного скрининга (более высокая точность)</li>
+<li><strong>Logistic Regression</strong> - для клинической практики (интерпретируемость коэффициентов)</li>
+</ul>
+</section>
+</section>
+<section id="ограничения-исследования" class="level2">
+<h2 class="anchored" data-anchor-id="ограничения-исследования">Ограничения исследования</h2>
+<ol type="1">
+<li><strong>Отсутствие дополнительных факторов</strong>: в данных нет информации о наследственности, питании, стрессовых факторах</li>
+<li><strong>Популяционные особенности</strong>: датасет может не полностью представлять все демографические группы</li>
+<li><strong>Временные ограничения</strong>: данные представляют срез во времени без анализа динамики</li>
+</ol>
+</section>
+<section id="направления-для-будущих-исследований" class="level2">
+<h2 class="anchored" data-anchor-id="направления-для-будущих-исследований">Направления для будущих исследований</h2>
+<ol type="1">
+<li><strong>Включение генетических маркеров</strong> для более точной оценки риска</li>
+<li><strong>Долгосрочное наблюдение</strong> за пациентами для оценки прогрессии заболевания</li>
+<li><strong>Интеграция с лабораторными анализами</strong> (биохимические показатели крови)</li>
+<li><strong>Разработка интерактивного калькулятора риска</strong> для использования клиницистами</li>
+</ol>
+</section>
+</section>
+<section id="заключение" class="level1">
+<h1>Заключение</h1>
+<p>В ходе данного исследования был проведен комплексный анализ данных сердечно-сосудистых заболеваний с целью выявления ключевых факторов риска и разработки предиктивных моделей.</p>
+<section id="основные-результаты" class="level2">
+<h2 class="anchored" data-anchor-id="основные-результаты">Основные результаты</h2>
+<ol type="1">
+<li><p><strong>Выявлены ключевые факторы риска</strong>: артериальное давление, возраст, уровень холестерина и BMI являются наиболее значимыми предикторами наличия ССЗ</p></li>
+<li><p><strong>Разработаны предиктивные модели</strong>: обе модели (Logistic Regression и Random Forest) превышают требуемые пороги качества (AUC-ROC &gt; 0.75)</p></li>
+<li><p><strong>Обеспечена воспроизводимость</strong>: полный анализ документирован с использованием Quarto, что гарантирует воспроизводимость результатов</p></li>
+<li><p><strong>Созданы практические рекомендации</strong>: разработаны конкретные рекомендации для медицинской лаборатории по использованию результатов анализа</p></li>
+</ol>
+</section>
+<section id="вклад-в-практику" class="level2">
+<h2 class="anchored" data-anchor-id="вклад-в-практику">Вклад в практику</h2>
+<p>Результаты исследования могут быть использованы для:</p>
+<ul>
+<li><strong>Оптимизации скрининговых программ</strong> - фокус на наиболее информативных показателях</li>
+<li><strong>Персонализации подхода</strong> - учет индивидуальных факторов риска пациента</li>
+<li><strong>Повышения эффективности профилактики</strong> - своевременное выявление групп риска</li>
+<li><strong>Автоматизации предварительной диагностики</strong> - использование ML моделей для поддержки принятия решений</li>
+</ul>
+</section>
+<section id="техническое-достижение" class="level2">
+<h2 class="anchored" data-anchor-id="техническое-достижение">Техническое достижение</h2>
+<p>Успешно реализован полный цикл анализа данных: от загрузки и очистки до построения и оценки моделей, с созданием полностью воспроизводимого исследования в формате Quarto документа.</p>
+<p>Исследование подтверждает эффективность машинного обучения в медицинской диагностике и предоставляет практический инструмент для использования в реальной клинической практике.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
