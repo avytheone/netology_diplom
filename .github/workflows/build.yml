@@ -1,0 +1,87 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+        
+    - name: Install UV
+      uses: astral-sh/setup-uv@v3
+      with:
+        version: "latest"
+        
+    - name: Install dependencies
+      run: |
+        uv sync
+        
+    - name: Install Quarto
+      uses: quarto-dev/quarto-action@v1
+      with:
+        version: 'latest'
+        
+    - name: Validate documents
+      run: |
+        uv run quarto check research.qmd
+        uv run quarto check presentation.qmd
+        
+    - name: Build research documents
+      run: |
+        uv run quarto render research.qmd --to html
+        uv run quarto render research.qmd --to pdf
+        
+    - name: Build presentation
+      run: |
+        uv run quarto render presentation.qmd --to html
+        
+    - name: Prepare artifacts
+      run: |
+        mkdir -p release
+        mv research.html research.pdf presentation.html release/
+        cp -r research_files release/ 2>/dev/null || true
+        cp -r presentation_files release/ 2>/dev/null || true
+        cp -r cardio_train.csv release/ 2>/dev/null || true
+        cp README.md TASK.md AGENTS.md release/ 2>/dev/null || true
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: diabetes-analysis-results
+        path: release/
+        retention-days: 30
+        
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          release/*
+        generate_release_notes: true
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Deploy to GitHub Pages
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./release
+        keep_files: true
