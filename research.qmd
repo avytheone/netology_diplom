@@ -13,6 +13,9 @@ copyright:
   license: "CC BY"
 pdf-engine: typst
 mainfont: "Times New Roman"
+format:
+  html:
+    width: 1600px
 ---
 
 # Введение
@@ -68,11 +71,13 @@ mainfont: "Times New Roman"
 
 # Результаты EDA
 
-## Загрузка и первичная проверка данных
+## Настройка окружения
+
+Для начала импортируем необходимые библиотеки и настроим параметры визуализации.
 
 ```{python}
-#| label: load-data
-#| fig-cap: "Загрузка и базовая информация о датасете"
+#| label: setup
+#| fig-cap: "Импорт библиотек и настройка стилей"
 
 import pandas as pd
 import numpy as np
@@ -80,6 +85,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from pathlib import Path
 import warnings
+from great_tables import GT
+
 warnings.filterwarnings('ignore')
 
 # Настройки для визуализаций
@@ -87,10 +94,19 @@ plt.style.use('seaborn-v0_8-whitegrid')
 # Монохромная палитра с красными акцентами
 colors = ['#808080', '#606060', '#404040', '#FF6B6B', '#CC5555']
 sns.set_palette(colors)
-plt.rcParams['font.size'] = 10
+plt.rcParams['font.size'] = 11
 plt.rcParams['figure.titlesize'] = 14
 plt.rcParams['axes.titlesize'] = 12
-plt.rcParams['axes.labelsize'] = 10
+plt.rcParams['axes.labelsize'] = 11
+```
+
+## Загрузка данных
+
+Загрузим набор данных и выведем основную информацию о его размере.
+
+```{python}
+#| label: load-data
+#| fig-cap: "Загрузка данных"
 
 # Загрузка данных
 data_path = 'cardio_train.csv'
@@ -98,47 +114,105 @@ df = pd.read_csv(data_path, sep=';')
 
 # Базовая информация
 print(f"Размер датасета: {df.shape}")
-print(f"\nПервые 5 строк:")
-print(df.head())
-print(f"\nТипы данных:")
-print(df.dtypes)
-print(f"\nСтатистическое описание:")
-print(df.describe())
 ```
 
-## Проверка на пропуски и дубликаты
+## Предварительный просмотр
+
+Ознакомимся со структурой данных, посмотрев на первые несколько строк.
+
+```{python}
+#| label: view-head
+#| tbl-cap: "Первые 5 строк датасета"
+
+GT(df.head())
+```
+
+## Типы данных
+
+Проверим типы данных каждого признака, чтобы убедиться в их корректности.
+
+```{python}
+#| label: check-types
+#| tbl-cap: "Типы данных в датасете"
+
+types_df = df.dtypes.reset_index()
+types_df.columns = ["Признак", "Тип данных"]
+GT(types_df)
+```
+
+## Описательная статистика
+
+Рассмотрим основные статистические характеристики числовых признаков.
+
+```{python}
+#| label: describe-stats
+#| tbl-cap: "Описательная статистика числовых признаков"
+
+stats_df = df.describe().reset_index()
+GT(stats_df)
+```
+
+## Проверка на пропуски
+
+Важным этапом является проверка данных на наличие пропущенных значений.
 
 ```{python}
 #| label: check-missing
-#| fig-cap: "Проверка качества данных"
+#| tbl-cap: "Анализ пропущенных значений"
 
 # Проверка пропусков
-missing_values = df.isnull().sum()
-print("Пропущенные значения:")
-print(missing_values[missing_values > 0] if missing_values.sum() > 0 else "Пропусков не обнаружено")
+missing_values = df.isnull().sum().reset_index()
+missing_values.columns = ["Признак", "Количество пропусков"]
+
+if missing_values["Количество пропусков"].sum() == 0:
+    print("Пропусков не обнаружено")
+else:
+    GT(missing_values[missing_values["Количество пропусков"] > 0])
+```
+
+## Проверка дубликатов
+
+Проверим наличие полных дубликатов записей, которые могут исказить результаты анализа, и удалим их при наличии.
+
+```{python}
+#| label: check-duplicates
+#| fig-cap: "Обработка дубликатов"
 
 # Проверка дубликатов
 duplicates = df.duplicated().sum()
-print(f"\nКоличество полных дубликатов: {duplicates}")
+print(f"Количество полных дубликатов: {duplicates}")
 
 # Удаление дубликатов если есть
 if duplicates > 0:
     df = df.drop_duplicates()
     print(f"После удаления дубликатов размер: {df.shape}")
+```
 
-# Проверка уникальных значений в категориальных переменных
+## Анализ категориальных признаков (структура)
+
+Посмотрим на уникальные значения в категориальных переменных для понимания их структуры.
+
+```{python}
+#| label: check-unique
+#| tbl-cap: "Уникальные значения категориальных признаков"
+
 categorical_cols = ['gender', 'cholesterol', 'gluc', 'smoke', 'alco', 'active', 'cardio']
-print("\nУникальные значения в категориальных переменных:")
+unique_data = []
+
 for col in categorical_cols:
-    unique_vals = df[col].unique()
-    print(f"{col}: {sorted(unique_vals)}")
+    unique_vals = sorted(df[col].unique())
+    unique_data.append({"Признак": col, "Уникальные значения": str(unique_vals)})
+
+GT(pd.DataFrame(unique_data))
 ```
 
 ## Распределение целевой переменной
 
+Проанализируем сбалансированность классов целевой переменной `cardio`. Это важно для выбора метрик оценки моделей.
+
 ```{python}
-#| label: target-distribution
-#| fig-cap: "Распределение наличия сердечно-сосудистых заболеваний"
+#| label: target-distribution-plot
+#| fig-cap: "График распределения наличия сердечно-сосудистых заболеваний"
 #| fig-width: 8
 #| fig-height: 6
 
@@ -157,161 +231,260 @@ for p in ax.patches:
 
 plt.tight_layout()
 plt.show()
+```
 
-# Вывод статистики
-print(f"Распределение целевой переменной:")
-print(f"Без заболевания: {df['cardio'].value_counts()[0]} ({df['cardio'].value_counts(normalize=True)[0]:.1%})")
-print(f"С заболеванием: {df['cardio'].value_counts()[1]} ({df['cardio'].value_counts(normalize=True)[1]:.1%})")
+Детальная статистика распределения целевой переменной:
+
+```{python}
+#| label: target-stats
+#| tbl-cap: "Статистика распределения целевой переменной"
+
+target_stats = df['cardio'].value_counts().reset_index()
+target_stats.columns = ['Cardio', 'Count']
+target_stats['Percentage'] = (target_stats['Count'] / total * 100).round(1).astype(str) + '%'
+GT(target_stats)
 ```
 
 ## Распределения числовых признаков
 
+Для удобства анализа преобразуем возраст из дней в годы.
+
 ```{python}
-#| label: numeric-distributions
-#| fig-cap: "Распределения числовых признаков"
-#| fig-width: 12
-#| fig-height: 10
-
-# Числовые признаки
-numeric_cols = ['age', 'height', 'weight', 'ap_hi', 'ap_lo']
-
-# Преобразование возраста из дней в годы
+#| label: calc-age
 df['age_years'] = df['age'] / 365.25
+```
 
-fig, axes = plt.subplots(2, 3, figsize=(15, 10))
-fig.suptitle('Распределения числовых признаков', fontsize=16, y=0.98)
+### Возраст
 
-# Возраст в годах
-sns.histplot(data=df, x='age_years', bins=30, ax=axes[0,0], color='#808080', alpha=0.7)
-axes[0,0].set_title('Возраст (годы)')
-axes[0,0].set_xlabel('Возраст, лет')
-axes[0,0].set_ylabel('Частота')
+Рассмотрим распределение возраста пациентов.
 
-# Рост
-sns.histplot(data=df, x='height', bins=30, ax=axes[0,1], color='#808080', alpha=0.7)
-axes[0,1].set_title('Рост')
-axes[0,1].set_xlabel('Рост, см')
+```{python}
+#| label: dist-age
+#| fig-cap: "Гистограмма распределения возраста"
+#| fig-width: 10
+#| fig-height: 6
 
-# Вес
-sns.histplot(data=df, x='weight', bins=30, ax=axes[0,2], color='#808080', alpha=0.7)
-axes[0,2].set_title('Вес')
-axes[0,2].set_xlabel('Вес, кг')
-
-# Систолическое давление
-sns.histplot(data=df, x='ap_hi', bins=30, ax=axes[1,0], color='#808080', alpha=0.7)
-axes[1,0].set_title('Систолическое артериальное давление')
-axes[1,0].set_xlabel('Давление, мм рт.ст.')
-
-# Диастолическое давление
-sns.histplot(data=df, x='ap_lo', bins=30, ax=axes[1,1], color='#808080', alpha=0.7)
-axes[1,1].set_title('Диастолическое артериальное давление')
-axes[1,1].set_xlabel('Давление, мм рт.ст.')
-
-# Удаляем пустой subplot
-axes[1,2].set_visible(False)
-
-plt.tight_layout()
+plt.figure(figsize=(10, 6))
+sns.histplot(data=df, x='age_years', bins=30, color='#808080', alpha=0.7)
+plt.title('Распределение возраста (годы)', fontsize=14)
+plt.xlabel('Возраст, лет')
+plt.ylabel('Частота')
+plt.grid(True, alpha=0.3)
 plt.show()
+```
 
-print("Статистика по числовым признакам:")
-print(df[['age_years', 'height', 'weight', 'ap_hi', 'ap_lo']].describe())
+### Рост
+
+Анализ распределения роста пациентов.
+
+```{python}
+#| label: dist-height
+#| fig-cap: "Гистограмма распределения роста"
+#| fig-width: 10
+#| fig-height: 6
+
+plt.figure(figsize=(10, 6))
+sns.histplot(data=df, x='height', bins=30, color='#808080', alpha=0.7)
+plt.title('Распределение роста', fontsize=14)
+plt.xlabel('Рост, см')
+plt.ylabel('Частота')
+plt.grid(True, alpha=0.3)
+plt.show()
+```
+
+### Вес
+
+Анализ распределения веса пациентов.
+
+```{python}
+#| label: dist-weight
+#| fig-cap: "Гистограмма распределения веса"
+#| fig-width: 10
+#| fig-height: 6
+
+plt.figure(figsize=(10, 6))
+sns.histplot(data=df, x='weight', bins=30, color='#808080', alpha=0.7)
+plt.title('Распределение веса', fontsize=14)
+plt.xlabel('Вес, кг')
+plt.ylabel('Частота')
+plt.grid(True, alpha=0.3)
+plt.show()
+```
+
+### Систолическое давление
+
+Распределение верхнего (систолического) артериального давления.
+
+```{python}
+#| label: dist-ap-hi
+#| fig-cap: "Гистограмма систолического давления"
+#| fig-width: 10
+#| fig-height: 6
+
+plt.figure(figsize=(10, 6))
+sns.histplot(data=df, x='ap_hi', bins=30, color='#808080', alpha=0.7)
+plt.title('Систолическое артериальное давление', fontsize=14)
+plt.xlabel('Давление, мм рт.ст.')
+plt.ylabel('Частота')
+plt.grid(True, alpha=0.3)
+plt.show()
+```
+
+### Диастолическое давление
+
+Распределение нижнего (диастолического) артериального давления.
+
+```{python}
+#| label: dist-ap-lo
+#| fig-cap: "Гистограмма диастолического давления"
+#| fig-width: 10
+#| fig-height: 6
+
+plt.figure(figsize=(10, 6))
+sns.histplot(data=df, x='ap_lo', bins=30, color='#808080', alpha=0.7)
+plt.title('Диастолическое артериальное давление', fontsize=14)
+plt.xlabel('Давление, мм рт.ст.')
+plt.ylabel('Частота')
+plt.grid(True, alpha=0.3)
+plt.show()
 ```
 
 ## Распределения категориальных признаков
 
+Проанализируем категориальные факторы риска.
+
+### Пол
+
+Соотношение мужчин и женщин в выборке.
+
 ```{python}
-#| label: categorical-distributions
-#| fig-cap: "Распределения категориальных признаков"
-#| fig-width: 15
-#| fig-height: 10
+#| label: dist-gender
+#| fig-cap: "Столбчатая диаграмма распределения по полу"
+#| fig-width: 8
+#| fig-height: 6
 
-fig, axes = plt.subplots(2, 4, figsize=(16, 10))
-fig.suptitle('Распределения категориальных признаков', fontsize=16, y=0.98)
-
-# Пол
 gender_counts = df['gender'].value_counts()
-ax1 = axes[0,0]
-ax1.pie(gender_counts.values, labels=['Женщины', 'Мужчины'], autopct='%1.1f%%', 
-        colors=['#808080', '#FF6B6B'], startangle=90)
-ax1.set_title('Распределение по полу')
+plt.figure(figsize=(8, 6))
+sns.barplot(x=['Женщины', 'Мужчины'], y=gender_counts.values, 
+            palette=['#808080', '#FF6B6B'])
+plt.title('Распределение по полу', fontsize=14)
+plt.ylabel('Количество')
+plt.grid(axis='y', alpha=0.3)
+plt.show()
+```
 
-# Холестерин
+### Холестерин
+
+Уровни холестерина среди пациентов.
+
+```{python}
+#| label: dist-cholesterol
+#| fig-cap: "Столбчатая диаграмма уровней холестерина"
+#| fig-width: 8
+#| fig-height: 6
+
 cholesterol_counts = df['cholesterol'].value_counts().sort_index()
-ax2 = axes[0,1]
-ax2.bar(['Норма', 'Выше нормы', 'Высокий'], cholesterol_counts.values, 
+plt.figure(figsize=(8, 6))
+plt.bar(['Норма', 'Выше нормы', 'Высокий'], cholesterol_counts.values, 
         color=['#808080', '#606060', '#FF6B6B'])
-ax2.set_title('Уровень холестерина')
-ax2.set_ylabel('Количество')
+plt.title('Уровень холестерина', fontsize=14)
+plt.ylabel('Количество')
+plt.grid(axis='y', alpha=0.3)
+plt.show()
+```
 
-# Глюкоза
+### Глюкоза
+
+Уровни глюкозы среди пациентов.
+
+```{python}
+#| label: dist-gluc
+#| fig-cap: "Столбчатая диаграмма уровней глюкозы"
+#| fig-width: 8
+#| fig-height: 6
+
 gluc_counts = df['gluc'].value_counts().sort_index()
-ax3 = axes[0,2]
-ax3.bar(['Норма', 'Выше нормы', 'Высокий'], gluc_counts.values, 
+plt.figure(figsize=(8, 6))
+plt.bar(['Норма', 'Выше нормы', 'Высокий'], gluc_counts.values, 
         color=['#808080', '#606060', '#FF6B6B'])
-ax3.set_title('Уровень глюкозы')
-ax3.set_ylabel('Количество')
+plt.title('Уровень глюкозы', fontsize=14)
+plt.ylabel('Количество')
+plt.grid(axis='y', alpha=0.3)
+plt.show()
+```
 
-# Курение
+### Курение
+
+Доля курящих пациентов.
+
+```{python}
+#| label: dist-smoke
+#| fig-cap: "Столбчатая диаграмма статуса курения"
+#| fig-width: 8
+#| fig-height: 6
+
 smoke_counts = df['smoke'].value_counts()
-ax4 = axes[0,3]
-ax4.pie(smoke_counts.values, labels=['Не курят', 'Курят'], autopct='%1.1f%%', 
-        colors=['#808080', '#FF6B6B'], startangle=90)
-ax4.set_title('Курение')
+plt.figure(figsize=(8, 6))
+sns.barplot(x=['Не курят', 'Курят'], y=smoke_counts.values, 
+            palette=['#808080', '#FF6B6B'])
+plt.title('Курение', fontsize=14)
+plt.ylabel('Количество')
+plt.grid(axis='y', alpha=0.3)
+plt.show()
+```
 
-# Алкоголь
+### Алкоголь
+
+Доля пациентов, употребляющих алкоголь.
+
+```{python}
+#| label: dist-alco
+#| fig-cap: "Столбчатая диаграмма употребления алкоголя"
+#| fig-width: 8
+#| fig-height: 6
+
 alco_counts = df['alco'].value_counts()
-ax5 = axes[1,0]
-ax5.pie(alco_counts.values, labels=['Не употребляют', 'Употребляют'], autopct='%1.1f%%', 
-        colors=['#808080', '#FF6B6B'], startangle=90)
-ax5.set_title('Употребление алкоголя')
+plt.figure(figsize=(8, 6))
+sns.barplot(x=['Не употребляют', 'Употребляют'], y=alco_counts.values, 
+            palette=['#808080', '#FF6B6B'])
+plt.title('Употребление алкоголя', fontsize=14)
+plt.ylabel('Количество')
+plt.grid(axis='y', alpha=0.3)
+plt.show()
+```
 
-# Физическая активность
+### Физическая активность
+
+Уровень физической активности пациентов.
+
+```{python}
+#| label: dist-active
+#| fig-cap: "Столбчатая диаграмма физической активности"
+#| fig-width: 8
+#| fig-height: 6
+
 active_counts = df['active'].value_counts()
-ax6 = axes[1,1]
-ax6.pie(active_counts.values, labels=['Неактивны', 'Активны'], autopct='%1.1f%%', 
-        colors=['#808080', '#FF6B6B'], startangle=90)
-ax6.set_title('Физическая активность')
-
-# Объединенная статистика
-ax7 = axes[1,2]
-ax7.axis('off')
-stats_text = """
-Статистика по категориальным признакам:
-
-Пол: {} женщин, {} мужчин
-Холестерин: {} норма, {} выше нормы, {} высокий
-Глюкоза: {} норма, {} выше нормы, {} высокий
-Курение: {} не курят, {} курят
-Алкоголь: {} не употребляют, {} употребляют
-Активность: {} неактивны, {} активны
-""".format(
-    gender_counts[1], gender_counts[2],
-    cholesterol_counts[1], cholesterol_counts[2], cholesterol_counts[3],
-    gluc_counts[1], gluc_counts[2], gluc_counts[3],
-    smoke_counts[0], smoke_counts[1],
-    alco_counts[0], alco_counts[1],
-    active_counts[0], active_counts[1]
-)
-ax7.text(0.1, 0.9, stats_text, transform=ax7.transAxes, fontsize=10,
-         verticalalignment='top', fontfamily='monospace')
-
-# Удаляем пустой subplot
-axes[1,3].set_visible(False)
-
-plt.tight_layout()
+plt.figure(figsize=(8, 6))
+sns.barplot(x=['Неактивны', 'Активны'], y=active_counts.values, 
+            palette=['#808080', '#FF6B6B'])
+plt.title('Физическая активность', fontsize=14)
+plt.ylabel('Количество')
+plt.grid(axis='y', alpha=0.3)
 plt.show()
 ```
 
 ## Корреляционный анализ
 
+Изучим линейные взаимосвязи между признаками, построив матрицу корреляций.
+
 ```{python}
-#| label: correlation-analysis
-#| fig-cap: "Корреляционная матрица признаков"
-#| fig-width: 10
-#| fig-height: 8
+#| label: correlation-heatmap
+#| fig-cap: "Тепловая карта корреляционной матрицы"
+#| fig-width: 12
+#| fig-height: 10
 
 # Подготовка данных для корреляции
-df_corr = df.drop(['id'], axis=1)  # Удаляем id как нерелевантный признак
+df_corr = df.drop(['id'], axis=1)
 
 # Расчет корреляционной матрицы
 correlation_matrix = df_corr.corr()
@@ -325,149 +498,251 @@ sns.heatmap(correlation_matrix, mask=mask, annot=True, cmap='RdYlBu_r', center=0
 plt.title('Корреляционная матрица признаков', fontsize=16, pad=20)
 plt.tight_layout()
 plt.show()
+```
 
-# Вывод сильных корреляций
-print("Сильные корреляции (|r| > 0.3):")
+Выделим наиболее сильные корреляции для детального рассмотрения.
+
+```{python}
+#| label: strong-correlations
+#| tbl-cap: "Сильные корреляции (|r| > 0.3)"
+
 strong_correlations = []
 for i in range(len(correlation_matrix.columns)):
     for j in range(i):
         if abs(correlation_matrix.iloc[i, j]) > 0.3:
             strong_correlations.append({
-                'pair': f"{correlation_matrix.columns[i]} - {correlation_matrix.columns[j]}",
-                'correlation': correlation_matrix.iloc[i, j]
+                'Пара признаков': f"{correlation_matrix.columns[i]} - {correlation_matrix.columns[j]}",
+                'Коэффициент корреляции': correlation_matrix.iloc[i, j]
             })
 
-for corr in strong_correlations:
-        print(f"{corr['pair']}: {corr['correlation']:.3f}")
+GT(pd.DataFrame(strong_correlations))
 ```
 
 ## Анализ выбросов
 
+Используем диаграммы размаха (boxplot) для выявления аномальных значений в числовых признаках.
+
+### Выбросы: Возраст
+
 ```{python}
-#| label: outlier-analysis
-#| fig-cap: "Анализ выбросов в числовых признаках"
-#| fig-width: 15
-#| fig-height: 10
+#| label: box-age
+#| fig-cap: "Box plot для возраста"
+#| fig-width: 8
+#| fig-height: 4
 
-fig, axes = plt.subplots(2, 3, figsize=(15, 10))
-fig.suptitle('Анализ выбросов (Box Plots)', fontsize=16, y=0.98)
-
-# Создаем box plots для числовых признаков
-numeric_features = ['age_years', 'height', 'weight', 'ap_hi', 'ap_lo']
-
-for i, feature in enumerate(numeric_features):
-    row = i // 3
-    col = i % 3
-    if row < 2 and col < 3:
-        sns.boxplot(data=df, y=feature, ax=axes[row, col], color='#808080')
-        axes[row, col].set_title(f'Box Plot: {feature}')
-        axes[row, col].set_ylabel('')
-
-# Удаляем пустой subplot
-axes[1, 2].set_visible(False)
-
-plt.tight_layout()
+plt.figure(figsize=(8, 4))
+sns.boxplot(data=df, x='age_years', color='#808080')
+plt.title('Box Plot: Возраст', fontsize=14)
+plt.xlabel('Лет')
 plt.show()
+```
 
-print("Анализ выбросов:")
+### Выбросы: Рост
+
+```{python}
+#| label: box-height
+#| fig-cap: "Box plot для роста"
+#| fig-width: 8
+#| fig-height: 4
+
+plt.figure(figsize=(8, 4))
+sns.boxplot(data=df, x='height', color='#808080')
+plt.title('Box Plot: Рост', fontsize=14)
+plt.xlabel('см')
+plt.show()
+```
+
+### Выбросы: Вес
+
+```{python}
+#| label: box-weight
+#| fig-cap: "Box plot для веса"
+#| fig-width: 8
+#| fig-height: 4
+
+plt.figure(figsize=(8, 4))
+sns.boxplot(data=df, x='weight', color='#808080')
+plt.title('Box Plot: Вес', fontsize=14)
+plt.xlabel('кг')
+plt.show()
+```
+
+### Выбросы: Систолическое давление
+
+```{python}
+#| label: box-ap-hi
+#| fig-cap: "Box plot для систолического давления"
+#| fig-width: 8
+#| fig-height: 4
+
+plt.figure(figsize=(8, 4))
+sns.boxplot(data=df, x='ap_hi', color='#808080')
+plt.title('Box Plot: Систолическое давление', fontsize=14)
+plt.xlabel('мм рт.ст.')
+plt.show()
+```
+
+### Выбросы: Диастолическое давление
+
+```{python}
+#| label: box-ap-lo
+#| fig-cap: "Box plot для диастолического давления"
+#| fig-width: 8
+#| fig-height: 4
+
+plt.figure(figsize=(8, 4))
+sns.boxplot(data=df, x='ap_lo', color='#808080')
+plt.title('Box Plot: Диастолическое давление', fontsize=14)
+plt.xlabel('мм рт.ст.')
+plt.show()
+```
+
+Количественная оценка выбросов по методу межквартильного размаха (IQR).
+
+```{python}
+#| label: outliers-stats
+#| tbl-cap: "Статистика по выбросам"
+
+numeric_features = ['age_years', 'height', 'weight', 'ap_hi', 'ap_lo']
+outliers_data = []
+
 for feature in numeric_features:
     Q1 = df[feature].quantile(0.25)
     Q3 = df[feature].quantile(0.75)
     IQR = Q3 - Q1
     lower_bound = Q1 - 1.5 * IQR
     upper_bound = Q3 + 1.5 * IQR
-    outliers = df[(df[feature] < lower_bound) | (df[feature] > upper_bound)]
-    print(f"{feature}: {len(outliers)} выбросов ({len(outliers)/len(df)*100:.1f}%)")
+    outliers_count = len(df[(df[feature] < lower_bound) | (df[feature] > upper_bound)])
+    outliers_data.append({
+        'Признак': feature,
+        'Количество выбросов': outliers_count,
+        'Процент': f"{outliers_count/len(df)*100:.1f}%"
+    })
+
+GT(pd.DataFrame(outliers_data))
 ```
 
 ## Очистка данных
 
+На основе EDA проведем очистку данных от аномальных и нереалистичных значений.
+
+### Инициализация
+
+Создадим копию датафрейма для очистки.
+
 ```{python}
-#| label: data-cleaning
-#| fig-cap: "Процесс очистки данных"
-
-# Создаем копию для очистки
+#| label: clean-init
 df_clean = df.copy()
-
 print(f"Исходный размер датасета: {df_clean.shape}")
+```
 
-# 1. Очистка артериального давления
-# Нереалистичные значения давления
-print("\nОчистка артериального давления...")
+### Очистка артериального давления
+
+Фильтрация нереалистичных значений давления. Используем следующие критерии:
+- Систолическое: 70-250 мм рт.ст.
+- Диастолическое: 40-150 мм рт.ст.
+- Систолическое должно быть выше диастолического.
+
+```{python}
+#| label: clean-pressure
+#| fig-cap: "Очистка давления"
+
 before_pressure = len(df_clean)
-
-# Фильтрация нереалистичных значений давления
-# Систолическое: нормальный диапазон 70-250 мм рт.ст.
-# Диастолическое: нормальный диапазон 40-150 мм рт.ст.
-# Систолическое должно быть выше диастолического
 df_clean = df_clean[
     (df_clean['ap_hi'] >= 70) & (df_clean['ap_hi'] <= 250) &
     (df_clean['ap_lo'] >= 40) & (df_clean['ap_lo'] <= 150) &
     (df_clean['ap_hi'] > df_clean['ap_lo'])
 ]
-
 after_pressure = len(df_clean)
 print(f"Удалено записей с нереалистичным давлением: {before_pressure - after_pressure}")
+```
 
-# 2. Очистка антропометрических данных
-print("\nОчистка антропометрических данных...")
+### Очистка антропометрических данных
+
+Фильтрация по росту и весу:
+- Рост: 100-220 см
+- Вес: 30-250 кг
+
+```{python}
+#| label: clean-anthro
+#| fig-cap: "Очистка роста и веса"
+
 before_anthro = len(df_clean)
-
-# Рост: нормальный диапазон 100-220 см
-# Вес: нормальный диапазон 30-250 кг
 df_clean = df_clean[
     (df_clean['height'] >= 100) & (df_clean['height'] <= 220) &
     (df_clean['weight'] >= 30) & (df_clean['weight'] <= 250)
 ]
-
 after_anthro = len(df_clean)
 print(f"Удалено записей с нереалистичным ростом/весом: {before_anthro - after_anthro}")
+```
 
-# 3. Очистка возраста
-print("\nОчистка возраста...")
+### Очистка возраста
+
+Оставляем пациентов от 18 до 100 лет.
+
+```{python}
+#| label: clean-age
+#| fig-cap: "Очистка возраста"
+
 before_age = len(df_clean)
-
-# Возраст: от 18 до 100 лет
 df_clean = df_clean[
     (df_clean['age_years'] >= 18) & (df_clean['age_years'] <= 100)
 ]
-
 after_age = len(df_clean)
 print(f"Удалено записей с нереалистичным возрастом: {before_age - after_age}")
+```
 
-# 4. Расчет BMI (индекс массы тела)
+### Расчет BMI
+
+Рассчитаем индекс массы тела (BMI) для дальнейшего анализа.
+
+```{python}
+#| label: calc-bmi
 df_clean['bmi'] = df_clean['weight'] / (df_clean['height'] / 100) ** 2
+print(f"Итоговый размер после очистки: {df_clean.shape}")
+```
 
-print(f"\nРазмер после очистки: {df_clean.shape}")
-print(f"Удалено всего: {len(df) - len(df_clean)} записей ({(len(df) - len(df_clean))/len(df)*100:.1f}%)")
+Статистика очищенного датасета:
 
-# Статистика после очистки
-print(f"\nСтатистика после очистки:")
-print(df_clean[['age_years', 'height', 'weight', 'ap_hi', 'ap_lo', 'bmi']].describe())
+```{python}
+#| label: clean-stats
+#| tbl-cap: "Статистика после очистки"
+
+clean_stats = df_clean[['age_years', 'height', 'weight', 'ap_hi', 'ap_lo', 'bmi']].describe().reset_index()
+GT(clean_stats)
 ```
 
 ## Анализ BMI и категоризация
 
+### Распределение BMI
+
+Посмотрим на распределение индекса массы тела в очищенной выборке.
+
 ```{python}
-#| label: bmi-analysis
-#| fig-cap: "Распределение и категоризация BMI"
-#| fig-width: 15
+#| label: dist-bmi
+#| fig-cap: "Гистограмма распределения BMI"
+#| fig-width: 10
 #| fig-height: 6
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+plt.figure(figsize=(10, 6))
+sns.histplot(data=df_clean, x='bmi', bins=30, color='#808080', alpha=0.7)
+plt.axvline(x=18.5, color='blue', linestyle='--', alpha=0.7, label='Недостаточный вес')
+plt.axvline(x=25, color='green', linestyle='--', alpha=0.7, label='Норма')
+plt.axvline(x=30, color='orange', linestyle='--', alpha=0.7, label='Избыточный вес')
+plt.axvline(x=35, color='red', linestyle='--', alpha=0.7, label='Ожирение')
+plt.title('Распределение BMI', fontsize=14)
+plt.xlabel('BMI')
+plt.ylabel('Частота')
+plt.legend()
+plt.show()
+```
 
-# Распределение BMI
-sns.histplot(data=df_clean, x='bmi', bins=30, ax=ax1, color='#808080', alpha=0.7)
-ax1.axvline(x=18.5, color='blue', linestyle='--', alpha=0.7, label='Недостаточный вес')
-ax1.axvline(x=25, color='green', linestyle='--', alpha=0.7, label='Норма')
-ax1.axvline(x=30, color='orange', linestyle='--', alpha=0.7, label='Избыточный вес')
-ax1.axvline(x=35, color='red', linestyle='--', alpha=0.7, label='Ожирение')
-ax1.set_title('Распределение BMI', fontsize=14)
-ax1.set_xlabel('BMI')
-ax1.set_ylabel('Частота')
-ax1.legend()
+### Категории BMI
 
-# Категоризация BMI
+Разделим пациентов на группы согласно классификации ВОЗ.
+
+```{python}
+#| label: bmi-categories-calc
 def categorize_bmi(bmi):
     if bmi < 18.5:
         return 'Недостаточный вес'
@@ -481,30 +756,46 @@ def categorize_bmi(bmi):
         return 'Ожирение II+ степени'
 
 df_clean['bmi_category'] = df_clean['bmi'].apply(categorize_bmi)
-
-# Распределение по категориям BMI
 bmi_counts = df_clean['bmi_category'].value_counts()
+```
+
+Визуализация распределения по категориям:
+
+```{python}
+#| label: bmi-pie
+#| fig-cap: "Столбчатая диаграмма категорий BMI"
+#| fig-width: 10
+#| fig-height: 6
+
 colors_bmi = ['#404040', '#606060', '#808080', '#FF6B6B', '#CC5555']
-ax2.pie(bmi_counts.values, labels=bmi_counts.index, autopct='%1.1f%%', 
-        colors=colors_bmi, startangle=90)
-ax2.set_title('Категории BMI', fontsize=14)
-
-plt.tight_layout()
+plt.figure(figsize=(10, 6))
+sns.barplot(x=bmi_counts.index, y=bmi_counts.values, palette=colors_bmi)
+plt.title('Категории BMI', fontsize=14)
+plt.ylabel('Количество')
+plt.grid(axis='y', alpha=0.3)
 plt.show()
+```
 
-print("Распределение по категориям BMI:")
-for category, count in bmi_counts.items():
-    print(f"{category}: {count} ({count/len(df_clean)*100:.1f}%)")
+Детальная статистика по категориям BMI:
+
+```{python}
+#| label: bmi-table
+#| tbl-cap: "Статистика по категориям BMI"
+
+bmi_table = bmi_counts.reset_index()
+bmi_table.columns = ['Категория', 'Количество']
+bmi_table['Доля'] = (bmi_table['Количество'] / len(df_clean) * 100).round(1).astype(str) + '%'
+GT(bmi_table)
 ```
 
 # Построение моделей
 
 ## Подготовка данных для моделирования
 
-```{python}
-#| label: data-preparation
-#| fig-cap: "Подготовка данных для моделирования"
+Импорт необходимых библиотек для машинного обучения.
 
+```{python}
+#| label: ml-imports
 from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
@@ -512,26 +803,36 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (accuracy_score, precision_score, recall_score, 
                            f1_score, roc_auc_score, roc_curve, 
                            confusion_matrix, classification_report)
+```
 
-# Подготовка признаков
+Разделение данных на матрицу признаков (X) и целевой вектор (y).
+
+```{python}
+#| label: split-xy
 # Удаляем нерелевантные признаки и подготовляем X, y
 X = df_clean.drop(['id', 'age', 'cardio', 'bmi_category'], axis=1)
 y = df_clean['cardio']
 
 print(f"Признаки для моделирования: {list(X.columns)}")
 print(f"Размер признакового пространства: {X.shape}")
+```
 
-# Разделение на обучающую и тестовую выборки
+Разделение на обучающую и тестовую выборки.
+
+```{python}
+#| label: train-test-split
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, stratify=y
 )
 
-print(f"\nРазмер обучающей выборки: {X_train.shape}")
+print(f"Размер обучающей выборки: {X_train.shape}")
 print(f"Размер тестовой выборки: {X_test.shape}")
-print(f"Распределение классов в train: {y_train.value_counts(normalize=True).to_dict()}")
-print(f"Распределение классов в test: {y_test.value_counts(normalize=True).to_dict()}")
+```
 
-# Стандартизация числовых признаков
+Стандартизация числовых признаков для улучшения работы линейных моделей.
+
+```{python}
+#| label: scaling
 numeric_features = ['age_years', 'height', 'weight', 'ap_hi', 'ap_lo', 'bmi']
 scaler = StandardScaler()
 
@@ -541,19 +842,24 @@ X_test_scaled = X_test.copy()
 X_train_scaled[numeric_features] = scaler.fit_transform(X_train[numeric_features])
 X_test_scaled[numeric_features] = scaler.transform(X_test[numeric_features])
 
-print("\nЧисловые признаки стандартизированы")
+print("Числовые признаки стандартизированы")
 ```
 
 ## Обучение моделей
 
+Настройка кросс-валидации.
+
 ```{python}
-#| label: model-training
-#| fig-cap: "Обучение и оценка моделей"
-
-# Настройка cross-validation
+#| label: cv-setup
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+```
 
-# 1. Logistic Regression (baseline)
+### Logistic Regression
+
+Обучение логистической регрессии как базовой модели.
+
+```{python}
+#| label: train-lr
 print("Обучение Logistic Regression...")
 lr_model = LogisticRegression(random_state=42, max_iter=1000)
 
@@ -563,9 +869,15 @@ print(f"Logistic Regression CV AUC: {lr_cv_scores.mean():.4f} ± {lr_cv_scores.s
 
 # Обучение на полных данных
 lr_model.fit(X_train_scaled, y_train)
+```
 
-# 2. Random Forest
-print("\nОбучение Random Forest...")
+### Random Forest
+
+Обучение случайного леса для выявления нелинейных зависимостей.
+
+```{python}
+#| label: train-rf
+print("Обучение Random Forest...")
 rf_model = RandomForestClassifier(n_estimators=100, random_state=42, max_depth=10)
 
 # Cross-validation
@@ -574,18 +886,14 @@ print(f"Random Forest CV AUC: {rf_cv_scores.mean():.4f} ± {rf_cv_scores.std():.
 
 # Обучение на полных данных
 rf_model.fit(X_train, y_train)
-
-print("\nМодели обучены успешно!")
 ```
 
 ## Оценка качества моделей
 
-```{python}
-#| label: model-evaluation
-#| fig-cap: "Сравнение качества моделей"
-#| fig-width: 15
-#| fig-height: 10
+Определим функцию для расчета метрик.
 
+```{python}
+#| label: eval-func
 def evaluate_model(model, X_test_data, y_test_data, model_name):
     """Функция для оценки модели"""
     # Предсказания
@@ -593,43 +901,52 @@ def evaluate_model(model, X_test_data, y_test_data, model_name):
     y_pred_proba = model.predict_proba(X_test_data)[:, 1]
     
     # Метрики
+    cm = confusion_matrix(y_test_data, y_pred)
+    tn, fp, fn, tp = cm.ravel()
+    specificity = tn / (tn + fp)
+    
     metrics = {
         'Accuracy': accuracy_score(y_test_data, y_pred),
         'Precision': precision_score(y_test_data, y_pred),
         'Recall': recall_score(y_test_data, y_pred),
         'F1-Score': f1_score(y_test_data, y_pred),
-        'ROC-AUC': roc_auc_score(y_test_data, y_pred_proba)
+        'ROC-AUC': roc_auc_score(y_test_data, y_pred_proba),
+        'Specificity': specificity
     }
     
-    print(f"\n{model_name}:")
-    for metric, value in metrics.items():
-        print(f"  {metric}: {value:.4f}")
-    
-    # Расчет специфичности
-    cm = confusion_matrix(y_test_data, y_pred)
-    tn, fp, fn, tp = cm.ravel()
-    specificity = tn / (tn + fp)
-    print(f"  Specificity: {specificity:.4f}")
-    
-    return metrics, y_pred, y_pred_proba, specificity
+    return metrics, y_pred, y_pred_proba
+```
 
-# Оценка моделей
-lr_metrics, lr_pred, lr_pred_proba, lr_specificity = evaluate_model(
+Получение метрик для обеих моделей.
+
+```{python}
+#| label: calc-metrics
+lr_metrics, lr_pred, lr_pred_proba = evaluate_model(
     lr_model, X_test_scaled, y_test, "Logistic Regression"
 )
 
-rf_metrics, rf_pred, rf_pred_proba, rf_specificity = evaluate_model(
+rf_metrics, rf_pred, rf_pred_proba = evaluate_model(
     rf_model, X_test, y_test, "Random Forest"
 )
+```
 
-# Сравнительная таблица
+### Сравнение метрик (График)
+
+Визуальное сравнение основных метрик моделей.
+
+```{python}
+#| label: compare-plot
+#| fig-cap: "Сравнение метрик качества моделей"
+#| fig-width: 10
+#| fig-height: 6
+
 metrics_comparison = pd.DataFrame({
     'Logistic Regression': lr_metrics,
     'Random Forest': rf_metrics
 }).T
 
-fig, ax = plt.subplots(figsize=(10, 6))
-metrics_comparison.plot(kind='bar', ax=ax, color=['#808080', '#FF6B6B', '#606060', '#404040', '#CC5555'])
+plt.figure(figsize=(10, 6))
+metrics_comparison.plot(kind='bar', color=['#808080', '#FF6B6B', '#606060', '#404040', '#CC5555', '#909090'])
 plt.title('Сравнение метрик качества моделей', fontsize=14, pad=20)
 plt.xlabel('Модель', fontsize=12)
 plt.ylabel('Значение метрики', fontsize=12)
@@ -637,16 +954,26 @@ plt.legend(title='Метрики', bbox_to_anchor=(1.05, 1), loc='upper left')
 plt.xticks(rotation=0)
 plt.tight_layout()
 plt.show()
-
-print("\nСравнительная таблица метрик:")
-print(metrics_comparison)
 ```
 
-## ROC-кривые моделей
+### Сравнение метрик (Таблица)
+
+Детальная таблица со значениями метрик.
 
 ```{python}
-#| label: roc-curves
-#| fig-cap: "ROC-кривые для сравнения моделей"
+#| label: compare-table
+#| tbl-cap: "Таблица метрик качества"
+
+GT(metrics_comparison.reset_index().rename(columns={'index': 'Модель'}).round(4))
+```
+
+## ROC-кривые
+
+Сравнение способности моделей разделять классы с помощью ROC-анализа.
+
+```{python}
+#| label: roc-curve-plot
+#| fig-cap: "ROC-кривые моделей"
 #| fig-width: 10
 #| fig-height: 8
 
@@ -664,7 +991,7 @@ auc_rf = roc_auc_score(y_test, rf_pred_proba)
 plt.plot(fpr_rf, tpr_rf, color='#FF6B6B', lw=2, 
          label=f'Random Forest (AUC = {auc_rf:.3f})')
 
-# Диагональ (случайный классификатор)
+# Диагональ
 plt.plot([0, 1], [0, 1], color='black', lw=1, linestyle='--', alpha=0.7)
 
 plt.xlim([0.0, 1.0])
@@ -674,53 +1001,63 @@ plt.ylabel('True Positive Rate', fontsize=12)
 plt.title('ROC-кривые для сравнения моделей', fontsize=14, pad=20)
 plt.legend(loc="lower right", fontsize=11)
 plt.grid(True, alpha=0.3)
-plt.tight_layout()
 plt.show()
 ```
 
 ## Матрицы ошибок
 
+Анализ структуры ошибок для каждой модели.
+
+### Logistic Regression
+
 ```{python}
-#| label: confusion-matrices
-#| fig-cap: "Матрицы ошибок для моделей"
-#| fig-width: 12
-#| fig-height: 6
+#| label: cm-lr
+#| fig-cap: "Матрица ошибок Logistic Regression"
+#| fig-width: 6
+#| fig-height: 5
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
-
-# Logistic Regression
+plt.figure(figsize=(6, 5))
 cm_lr = confusion_matrix(y_test, lr_pred)
-sns.heatmap(cm_lr, annot=True, fmt='d', cmap='Blues', ax=ax1, 
+sns.heatmap(cm_lr, annot=True, fmt='d', cmap='Blues', 
            xticklabels=['Нет заболевания', 'Есть заболевание'],
            yticklabels=['Нет заболевания', 'Есть заболевание'])
-ax1.set_title('Logistic Regression\nМатрица ошибок', fontsize=12)
-ax1.set_xlabel('Предсказано')
-ax1.set_ylabel('Фактически')
-
-# Random Forest
-cm_rf = confusion_matrix(y_test, rf_pred)
-sns.heatmap(cm_rf, annot=True, fmt='d', cmap='Blues', ax=ax2,
-           xticklabels=['Нет заболевания', 'Есть заболевание'],
-           yticklabels=['Нет заболевания', 'Есть заболевание'])
-ax2.set_title('Random Forest\nМатрица ошибок', fontsize=12)
-ax2.set_xlabel('Предсказано')
-ax2.set_ylabel('Фактически')
-
+plt.title('Logistic Regression: Матрица ошибок', fontsize=12)
+plt.xlabel('Предсказано')
+plt.ylabel('Фактически')
 plt.tight_layout()
 plt.show()
+```
 
-# Расчет специфичности уже выполнен ранее в evaluate_model
+### Random Forest
+
+```{python}
+#| label: cm-rf
+#| fig-cap: "Матрица ошибок Random Forest"
+#| fig-width: 6
+#| fig-height: 5
+
+plt.figure(figsize=(6, 5))
+cm_rf = confusion_matrix(y_test, rf_pred)
+sns.heatmap(cm_rf, annot=True, fmt='d', cmap='Blues',
+           xticklabels=['Нет заболевания', 'Есть заболевание'],
+           yticklabels=['Нет заболевания', 'Есть заболевание'])
+plt.title('Random Forest: Матрица ошибок', fontsize=12)
+plt.xlabel('Предсказано')
+plt.ylabel('Фактически')
+plt.tight_layout()
+plt.show()
 ```
 
 ## Важность признаков
 
+Анализ того, какие признаки оказали наибольшее влияние на предсказания модели Random Forest.
+
 ```{python}
-#| label: feature-importance
-#| fig-cap: "Важность признаков для Random Forest"
+#| label: feat-imp-plot
+#| fig-cap: "График важности признаков (Random Forest)"
 #| fig-width: 10
 #| fig-height: 8
 
-# Важность признаков для Random Forest
 feature_importance = pd.DataFrame({
     'feature': X.columns,
     'importance': rf_model.feature_importances_
@@ -734,103 +1071,157 @@ plt.xlabel('Важность', fontsize=12)
 plt.ylabel('Признак', fontsize=12)
 plt.tight_layout()
 plt.show()
+```
 
-print("Топ-10 важных признаков:")
-print(feature_importance.head(10))
+Топ-10 наиболее важных признаков для Random Forest:
 
-# Для Logistic Regression посмотрим на коэффициенты
+```{python}
+#| label: feat-imp-table
+#| tbl-cap: "Топ-10 признаков (Random Forest)"
+
+GT(feature_importance.head(10))
+```
+
+Коэффициенты логистической регрессии для интерпретации влияния признаков.
+
+```{python}
+#| label: lr-coef-table
+#| tbl-cap: "Топ-10 коэффициентов Logistic Regression"
+
 lr_coefficients = pd.DataFrame({
     'feature': X.columns,
     'coefficient': lr_model.coef_[0],
     'abs_coefficient': np.abs(lr_model.coef_[0])
 }).sort_values('abs_coefficient', ascending=False)
 
-print("\nТоп-10 коэффициентов Logistic Regression:")
-print(lr_coefficients.head(10)[['feature', 'coefficient']])
+GT(lr_coefficients.head(10)[['feature', 'coefficient']])
 ```
 
-# Сравнительный анализ моделей
+## Детальное сравнение метрик
 
-## Детальное сравнение моделей
+Построим отдельные графики для каждой метрики.
 
 ```{python}
-#| label: detailed-comparison
-#| fig-cap: "Детальное сравнение моделей"
-
-# Создание сводной таблицы результатов
-comparison_results = pd.DataFrame({
-    'Метрика': ['Accuracy', 'Precision', 'Recall', 'F1-Score', 'ROC-AUC', 'Специфичность'],
-    'Logistic Regression': [
-        lr_metrics['Accuracy'],
-        lr_metrics['Precision'],
-        lr_metrics['Recall'],
-        lr_metrics['F1-Score'],
-        lr_metrics['ROC-AUC'],
-        lr_specificity
-    ],
-    'Random Forest': [
-        rf_metrics['Accuracy'],
-        rf_metrics['Precision'],
-        rf_metrics['Recall'],
-        rf_metrics['F1-Score'],
-        rf_metrics['ROC-AUC'],
-        rf_specificity
-    ],
-    'Разница (RF - LR)': [
-        rf_metrics['Accuracy'] - lr_metrics['Accuracy'],
-        rf_metrics['Precision'] - lr_metrics['Precision'],
-        rf_metrics['Recall'] - lr_metrics['Recall'],
-        rf_metrics['F1-Score'] - lr_metrics['F1-Score'],
-        rf_metrics['ROC-AUC'] - lr_metrics['ROC-AUC'],
-        rf_specificity - lr_specificity
-    ]
-})
-
-print("Сравнительный анализ моделей:")
-print(comparison_results.to_string(index=False, float_format='%.4f'))
-
-# Визуализация сравнения
-fig, axes = plt.subplots(2, 3, figsize=(15, 10))
-fig.suptitle('Детальное сравнение метрик моделей', fontsize=16, y=0.98)
-
-# Создание словаря с включая специфичность
-lr_metrics_all = {**lr_metrics, 'Специфичность': lr_specificity}
-rf_metrics_all = {**rf_metrics, 'Специфичность': rf_specificity}
-
-metrics_list = ['Accuracy', 'Precision', 'Recall', 'F1-Score', 'ROC-AUC', 'Специфичность']
+#| label: detailed-comparison-data
+metrics_list = ['Accuracy', 'Precision', 'Recall', 'F1-Score', 'ROC-AUC', 'Specificity']
+models = ['Logistic Regression', 'Random Forest']
 colors = ['#808080', '#FF6B6B']
+```
 
-for i, metric in enumerate(metrics_list):
-    row = i // 3
-    col = i % 3
-    
-    values = [lr_metrics_all[metric], rf_metrics_all[metric]]
-    models = ['Logistic Regression', 'Random Forest']
-    
-    bars = axes[row, col].bar(models, values, color=colors)
-    axes[row, col].set_title(metric)
-    axes[row, col].set_ylim(0, 1)
-    axes[row, col].tick_params(axis='x', rotation=45)
-    
-    # Добавление значений на бары
-    for bar, value in zip(bars, values):
-        height = bar.get_height()
-        axes[row, col].text(bar.get_x() + bar.get_width()/2., height + 0.01,
-                          f'{value:.3f}', ha='center', va='bottom')
+### Accuracy
 
-plt.tight_layout()
+```{python}
+#| label: comp-accuracy
+#| fig-cap: "Сравнение Accuracy"
+#| fig-width: 6
+#| fig-height: 4
+
+val_acc = [lr_metrics['Accuracy'], rf_metrics['Accuracy']]
+plt.figure(figsize=(6, 4))
+bars = plt.bar(models, val_acc, color=colors)
+plt.title('Accuracy')
+plt.ylim(0, 1)
+for bar, value in zip(bars, val_acc):
+    plt.text(bar.get_x() + bar.get_width()/2., bar.get_height() + 0.01, f'{value:.3f}', ha='center')
+plt.show()
+```
+
+### Precision
+
+```{python}
+#| label: comp-precision
+#| fig-cap: "Сравнение Precision"
+#| fig-width: 6
+#| fig-height: 4
+
+val_prec = [lr_metrics['Precision'], rf_metrics['Precision']]
+plt.figure(figsize=(6, 4))
+bars = plt.bar(models, val_prec, color=colors)
+plt.title('Precision')
+plt.ylim(0, 1)
+for bar, value in zip(bars, val_prec):
+    plt.text(bar.get_x() + bar.get_width()/2., bar.get_height() + 0.01, f'{value:.3f}', ha='center')
+plt.show()
+```
+
+### Recall
+
+```{python}
+#| label: comp-recall
+#| fig-cap: "Сравнение Recall"
+#| fig-width: 6
+#| fig-height: 4
+
+val_rec = [lr_metrics['Recall'], rf_metrics['Recall']]
+plt.figure(figsize=(6, 4))
+bars = plt.bar(models, val_rec, color=colors)
+plt.title('Recall')
+plt.ylim(0, 1)
+for bar, value in zip(bars, val_rec):
+    plt.text(bar.get_x() + bar.get_width()/2., bar.get_height() + 0.01, f'{value:.3f}', ha='center')
+plt.show()
+```
+
+### F1-Score
+
+```{python}
+#| label: comp-f1
+#| fig-cap: "Сравнение F1-Score"
+#| fig-width: 6
+#| fig-height: 4
+
+val_f1 = [lr_metrics['F1-Score'], rf_metrics['F1-Score']]
+plt.figure(figsize=(6, 4))
+bars = plt.bar(models, val_f1, color=colors)
+plt.title('F1-Score')
+plt.ylim(0, 1)
+for bar, value in zip(bars, val_f1):
+    plt.text(bar.get_x() + bar.get_width()/2., bar.get_height() + 0.01, f'{value:.3f}', ha='center')
+plt.show()
+```
+
+### ROC-AUC
+
+```{python}
+#| label: comp-auc
+#| fig-cap: "Сравнение ROC-AUC"
+#| fig-width: 6
+#| fig-height: 4
+
+val_auc = [lr_metrics['ROC-AUC'], rf_metrics['ROC-AUC']]
+plt.figure(figsize=(6, 4))
+bars = plt.bar(models, val_auc, color=colors)
+plt.title('ROC-AUC')
+plt.ylim(0, 1)
+for bar, value in zip(bars, val_auc):
+    plt.text(bar.get_x() + bar.get_width()/2., bar.get_height() + 0.01, f'{value:.3f}', ha='center')
+plt.show()
+```
+
+### Specificity
+
+```{python}
+#| label: comp-spec
+#| fig-cap: "Сравнение Specificity"
+#| fig-width: 6
+#| fig-height: 4
+
+val_spec = [lr_metrics['Specificity'], rf_metrics['Specificity']]
+plt.figure(figsize=(6, 4))
+bars = plt.bar(models, val_spec, color=colors)
+plt.title('Specificity')
+plt.ylim(0, 1)
+for bar, value in zip(bars, val_spec):
+    plt.text(bar.get_x() + bar.get_width()/2., bar.get_height() + 0.01, f'{value:.3f}', ha='center')
 plt.show()
 ```
 
 ## Анализ пороговых значений
 
-```{python}
-#| label: threshold-analysis
-#| fig-cap: "Анализ пороговых значений для классификации"
-#| fig-width: 12
-#| fig-height: 6
+Исследуем, как меняются метрики при изменении порога классификации.
 
-# Анализ различных пороговых значений
+```{python}
+#| label: thresholds-calc
 thresholds = np.arange(0.3, 0.8, 0.05)
 
 def calculate_metrics_at_threshold(y_true, y_proba, threshold):
@@ -843,7 +1234,6 @@ def calculate_metrics_at_threshold(y_true, y_proba, threshold):
         'f1': f1_score(y_true, y_pred)
     }
 
-# Расчет метрик для разных порогов
 threshold_metrics_lr = []
 threshold_metrics_rf = []
 
@@ -853,42 +1243,59 @@ for threshold in thresholds:
 
 df_thresholds_lr = pd.DataFrame(threshold_metrics_lr)
 df_thresholds_rf = pd.DataFrame(threshold_metrics_rf)
+```
 
-# Визуализация
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+### Зависимость метрик от порога: Logistic Regression
 
-# Logistic Regression
+```{python}
+#| label: thresh-lr
+#| fig-cap: "Метрики vs Порог (Logistic Regression)"
+#| fig-width: 10
+#| fig-height: 6
+
+plt.figure(figsize=(10, 6))
 for metric in ['accuracy', 'precision', 'recall', 'f1']:
-    ax1.plot(df_thresholds_lr['threshold'], df_thresholds_lr[metric], 
+    plt.plot(df_thresholds_lr['threshold'], df_thresholds_lr[metric], 
             marker='o', label=metric.capitalize())
 
-ax1.axvline(x=0.5, color='red', linestyle='--', alpha=0.7, label='Порог 0.5')
-ax1.set_xlabel('Порог классификации')
-ax1.set_ylabel('Значение метрики')
-ax1.set_title('Logistic Regression: Зависимость метрик от порога')
-ax1.legend()
-ax1.grid(True, alpha=0.3)
-
-# Random Forest
-for metric in ['accuracy', 'precision', 'recall', 'f1']:
-    ax2.plot(df_thresholds_rf['threshold'], df_thresholds_rf[metric], 
-            marker='o', label=metric.capitalize())
-
-ax2.axvline(x=0.5, color='red', linestyle='--', alpha=0.7, label='Порог 0.5')
-ax2.set_xlabel('Порог классификации')
-ax2.set_ylabel('Значение метрики')
-ax2.set_title('Random Forest: Зависимость метрик от порога')
-ax2.legend()
-ax2.grid(True, alpha=0.3)
-
-plt.tight_layout()
+plt.axvline(x=0.5, color='red', linestyle='--', alpha=0.7, label='Порог 0.5')
+plt.xlabel('Порог классификации')
+plt.ylabel('Значение метрики')
+plt.title('Logistic Regression: Зависимость метрик от порога')
+plt.legend()
+plt.grid(True, alpha=0.3)
 plt.show()
+```
 
-# Оптимальные пороги по F1
+### Зависимость метрик от порога: Random Forest
+
+```{python}
+#| label: thresh-rf
+#| fig-cap: "Метрики vs Порог (Random Forest)"
+#| fig-width: 10
+#| fig-height: 6
+
+plt.figure(figsize=(10, 6))
+for metric in ['accuracy', 'precision', 'recall', 'f1']:
+    plt.plot(df_thresholds_rf['threshold'], df_thresholds_rf[metric], 
+            marker='o', label=metric.capitalize())
+
+plt.axvline(x=0.5, color='red', linestyle='--', alpha=0.7, label='Порог 0.5')
+plt.xlabel('Порог классификации')
+plt.ylabel('Значение метрики')
+plt.title('Random Forest: Зависимость метрик от порога')
+plt.legend()
+plt.grid(True, alpha=0.3)
+plt.show()
+```
+
+Оптимальные пороги по F1-score:
+
+```{python}
+#| label: opt-thresh
 optimal_threshold_lr = df_thresholds_lr.loc[df_thresholds_lr['f1'].idxmax(), 'threshold']
 optimal_threshold_rf = df_thresholds_rf.loc[df_thresholds_rf['f1'].idxmax(), 'threshold']
 
-print(f"\nОптимальные пороги по F1-score:")
 print(f"Logistic Regression: {optimal_threshold_lr:.3f}")
 print(f"Random Forest: {optimal_threshold_rf:.3f}")
 ```

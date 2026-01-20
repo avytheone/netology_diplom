@@ -218,3 +218,4 @@ __marimo__/
 *.hidden.md
 /.quarto/
 **/*.quarto_ipynb
+out/

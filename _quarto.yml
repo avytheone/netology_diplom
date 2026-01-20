@@ -1,3 +1,10 @@
 project:
   type: website
   output-dir: docs
+
+format:
+  html:
+    default: true
+    toc: true
+    toc-location: left
+    embed-resources: true
