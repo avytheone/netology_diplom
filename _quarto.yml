@@ -8,3 +8,13 @@ format:
     toc: true
     toc-location: left
     embed-resources: true
+    page-layout: full
+  revealjs:
+    theme: simple
+    transition: slide
+    slide-number: true
+    preview-links: auto
+    footer: "Netology DSU-73"
+    width: 1920
+    height: 1024
+    embed-resources: true

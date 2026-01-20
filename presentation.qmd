@@ -7,11 +7,11 @@ format:
     theme: simple
     transition: slide
     slide-number: true
-    chalkboard: true
+    chalkboard: false
     preview-links: auto
     footer: "Netology DSU-73"
-    width: 1280
-    height: 720
+    width: 1920
+    height: 1024
 jupyter: python3
 ---
 
