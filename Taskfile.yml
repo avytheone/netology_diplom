@@ -25,7 +25,11 @@ tasks:
       # Preserve docs directory existence
       - mkdir -p docs 
 
-  build:
+  build:presentation:
+    cmds:
+      - "{{.QUARTO}} render presentation.qmd"
+
+  build:research:
     desc: Build all documents to docs/
     cmds:
       - "{{.QUARTO}} render research.qmd"
