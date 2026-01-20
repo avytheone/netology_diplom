@@ -361,371 +361,14 @@ if duplicates > 0:
 
 **Вывод:** Проверка на дубликаты выполнена. Уникальность записей подтверждена (или восстановлена).
 
-## Анализ категориальных признаков (структура)
-
-Посмотрим на уникальные значения в категориальных переменных для понимания их структуры.
-
-```{python}
-#| label: check-unique
-#| tbl-cap: "Уникальные значения категориальных признаков"
-
-categorical_cols = ['gender', 'cholesterol', 'gluc', 'smoke', 'alco', 'active', 'cardio']
-unique_data = []
-
-for col in categorical_cols:
-    unique_vals = sorted(df[col].unique())
-    unique_data.append({"Признак": col, "Уникальные значения": str(unique_vals)})
-
-GT(pd.DataFrame(unique_data))
-```
-
-**Вывод:** Значения категориальных признаков соответствуют ожидаемым и не содержат неявных дубликатов или ошибок ввода.
-
-## Распределение целевой переменной
-
-Проанализируем сбалансированность классов целевой переменной `cardio`. Это важно для выбора метрик оценки моделей.
-
-```{python}
-#| label: target-distribution-plot
-#| fig-cap: "График распределения наличия сердечно-сосудистых заболеваний"
-#| fig-width: 8
-#| fig-height: 6
-
-plt.figure(figsize=(8, 6))
-ax = sns.countplot(data=df, x='cardio', palette=['#808080', '#FF6B6B'])
-plt.title('Распределение наличия сердечно-сосудистых заболеваний', fontsize=14, pad=20)
-plt.xlabel('Наличие заболевания (0 - нет, 1 - да)', fontsize=12)
-plt.ylabel('Количество пациентов', fontsize=12)
-
-# Добавление процентов
-total = len(df)
-for p in ax.patches:
-    percentage = f'{100 * p.get_height() / total:.1f}%'
-    ax.annotate(percentage, (p.get_x() + p.get_width() / 2., p.get_height()),
-                ha='center', va='bottom', fontsize=11)
-
-plt.tight_layout()
-plt.show()
-```
-
-Детальная статистика распределения целевой переменной:
-
-```{python}
-#| label: target-stats
-#| tbl-cap: "Статистика распределения целевой переменной"
-
-target_stats = df['cardio'].value_counts().reset_index()
-target_stats.columns = ['Cardio', 'Count']
-target_stats['Percentage'] = (target_stats['Count'] / total * 100).round(1).astype(str) + '%'
-GT(target_stats)
-```
-
-**Вывод:** Классы сбалансированы (~50% на 50%), что позволяет использовать accuracy как одну из метрик и не требует применения техник балансировки (SMOTE и др.).
-
-## Распределения числовых признаков
-
-Для удобства анализа преобразуем возраст из дней в годы.
-
-```{python}
-#| label: calc-age
-df['age_years'] = df['age'] / 365.25
-```
-
-**Вывод:** Возраст успешно сконвертирован в годы для улучшения интерпретируемости анализа.
-
-### Возраст
-
-Рассмотрим распределение возраста пациентов.
-
-```{python}
-#| label: dist-age
-#| fig-cap: "Гистограмма распределения возраста"
-#| fig-width: 10
-#| fig-height: 6
-
-plt.figure(figsize=(10, 6))
-sns.histplot(data=df, x='age_years', bins=30, color='#808080', alpha=0.7)
-plt.title('Распределение возраста (годы)', fontsize=14)
-plt.xlabel('Возраст, лет')
-plt.ylabel('Частота')
-plt.grid(True, alpha=0.3)
-plt.show()
-```
-
-**Вывод:** Основная масса пациентов находится в возрасте от 40 до 65 лет, что соответствует группе риска ССЗ.
-
-### Рост
-
-Анализ распределения роста пациентов.
-
-```{python}
-#| label: dist-height
-#| fig-cap: "Гистограмма распределения роста"
-#| fig-width: 10
-#| fig-height: 6
-
-plt.figure(figsize=(10, 6))
-sns.histplot(data=df, x='height', bins=30, color='#808080', alpha=0.7)
-plt.title('Распределение роста', fontsize=14)
-plt.xlabel('Рост, см')
-plt.ylabel('Частота')
-plt.grid(True, alpha=0.3)
-plt.show()
-```
-
-**Вывод:** Распределение роста близко к нормальному, однако присутствуют аномально низкие и высокие значения, требующие проверки.
-
-### Вес
-
-Анализ распределения веса пациентов.
-
-```{python}
-#| label: dist-weight
-#| fig-cap: "Гистограмма распределения веса"
-#| fig-width: 10
-#| fig-height: 6
-
-plt.figure(figsize=(10, 6))
-sns.histplot(data=df, x='weight', bins=30, color='#808080', alpha=0.7)
-plt.title('Распределение веса', fontsize=14)
-plt.xlabel('Вес, кг')
-plt.ylabel('Частота')
-plt.grid(True, alpha=0.3)
-plt.show()
-```
-
-**Вывод:** Распределение веса имеет "тяжелый" правый хвост, указывающий на наличие пациентов с значительным избыточным весом.
-
-### Систолическое давление
-
-Распределение верхнего (систолического) артериального давления.
-
-```{python}
-#| label: dist-ap-hi
-#| fig-cap: "Гистограмма систолического давления"
-#| fig-width: 10
-#| fig-height: 6
-
-plt.figure(figsize=(10, 6))
-sns.histplot(data=df, x='ap_hi', bins=30, color='#808080', alpha=0.7)
-plt.title('Систолическое артериальное давление', fontsize=14)
-plt.xlabel('Давление, мм рт.ст.')
-plt.ylabel('Частота')
-plt.grid(True, alpha=0.3)
-plt.show()
-```
-
-**Вывод:** Гистограмма подтверждает наличие грубых ошибок в данных давления (например, отрицательные или нереалистично высокие значения).
-
-### Диастолическое давление
-
-Распределение нижнего (диастолического) артериального давления.
-
-```{python}
-#| label: dist-ap-lo
-#| fig-cap: "Гистограмма диастолического давления"
-#| fig-width: 10
-#| fig-height: 6
-
-plt.figure(figsize=(10, 6))
-sns.histplot(data=df, x='ap_lo', bins=30, color='#808080', alpha=0.7)
-plt.title('Диастолическое артериальное давление', fontsize=14)
-plt.xlabel('Давление, мм рт.ст.')
-plt.ylabel('Частота')
-plt.grid(True, alpha=0.3)
-plt.show()
-```
-
-**Вывод:** Данные диастолического давления также содержат шум и выбросы, подлежащие фильтрации.
-
-## Распределения категориальных признаков
-
-Проанализируем категориальные факторы риска.
-
-### Пол
-
-Соотношение мужчин и женщин в выборке.
-
-```{python}
-#| label: dist-gender
-#| fig-cap: "Столбчатая диаграмма распределения по полу"
-#| fig-width: 8
-#| fig-height: 6
-
-gender_counts = df['gender'].value_counts()
-plt.figure(figsize=(8, 6))
-sns.barplot(x=['Женщины', 'Мужчины'], y=gender_counts.values, 
-            palette=['#808080', '#FF6B6B'])
-plt.title('Распределение по полу', fontsize=14)
-plt.ylabel('Количество')
-plt.grid(axis='y', alpha=0.3)
-plt.show()
-```
-
-**Вывод:** Женщины составляют большую часть выборки (~65%), что необходимо учитывать при интерпретации результатов.
-
-### Холестерин
-
-Уровни холестерина среди пациентов.
-
-```{python}
-#| label: dist-cholesterol
-#| fig-cap: "Столбчатая диаграмма уровней холестерина"
-#| fig-width: 8
-#| fig-height: 6
-
-cholesterol_counts = df['cholesterol'].value_counts().sort_index()
-plt.figure(figsize=(8, 6))
-plt.bar(['Норма', 'Выше нормы', 'Высокий'], cholesterol_counts.values, 
-        color=['#808080', '#606060', '#FF6B6B'])
-plt.title('Уровень холестерина', fontsize=14)
-plt.ylabel('Количество')
-plt.grid(axis='y', alpha=0.3)
-plt.show()
-```
-
-**Вывод:** Большинство пациентов имеют нормальный уровень холестерина, но значительная доля (около 25%) находится в зоне повышенного риска.
-
-### Глюкоза
-
-Уровни глюкозы среди пациентов.
-
-```{python}
-#| label: dist-gluc
-#| fig-cap: "Столбчатая диаграмма уровней глюкозы"
-#| fig-width: 8
-#| fig-height: 6
-
-gluc_counts = df['gluc'].value_counts().sort_index()
-plt.figure(figsize=(8, 6))
-plt.bar(['Норма', 'Выше нормы', 'Высокий'], gluc_counts.values, 
-        color=['#808080', '#606060', '#FF6B6B'])
-plt.title('Уровень глюкозы', fontsize=14)
-plt.ylabel('Количество')
-plt.grid(axis='y', alpha=0.3)
-plt.show()
-```
-
-**Вывод:** Аналогично холестерину, повышенный уровень глюкозы наблюдается у меньшинства, однако это важный фактор риска.
-
-### Курение
-
-Доля курящих пациентов.
-
-```{python}
-#| label: dist-smoke
-#| fig-cap: "Столбчатая диаграмма статуса курения"
-#| fig-width: 8
-#| fig-height: 6
-
-smoke_counts = df['smoke'].value_counts()
-plt.figure(figsize=(8, 6))
-sns.barplot(x=['Не курят', 'Курят'], y=smoke_counts.values, 
-            palette=['#808080', '#FF6B6B'])
-plt.title('Курение', fontsize=14)
-plt.ylabel('Количество')
-plt.grid(axis='y', alpha=0.3)
-plt.show()
-```
-
-**Вывод:** Курящие пациенты составляют меньшую часть выборки. Интересно проверить корреляцию курения с полом и ССЗ.
-
-### Алкоголь
-
-Доля пациентов, употребляющих алкоголь.
-
-```{python}
-#| label: dist-alco
-#| fig-cap: "Столбчатая диаграмма употребления алкоголя"
-#| fig-width: 8
-#| fig-height: 6
-
-alco_counts = df['alco'].value_counts()
-plt.figure(figsize=(8, 6))
-sns.barplot(x=['Не употребляют', 'Употребляют'], y=alco_counts.values, 
-            palette=['#808080', '#FF6B6B'])
-plt.title('Употребление алкоголя', fontsize=14)
-plt.ylabel('Количество')
-plt.grid(axis='y', alpha=0.3)
-plt.show()
-```
-
-**Вывод:** Употребление алкоголя задекларировано лишь у малой части пациентов (около 5%), что может быть связано с особенностями сбора данных (социальная желательность).
-
-### Физическая активность
-
-Уровень физической активности пациентов.
-
-```{python}
-#| label: dist-active
-#| fig-cap: "Столбчатая диаграмма физической активности"
-#| fig-width: 8
-#| fig-height: 6
-
-active_counts = df['active'].value_counts()
-plt.figure(figsize=(8, 6))
-sns.barplot(x=['Неактивны', 'Активны'], y=active_counts.values, 
-            palette=['#808080', '#FF6B6B'])
-plt.title('Физическая активность', fontsize=14)
-plt.ylabel('Количество')
-plt.grid(axis='y', alpha=0.3)
-plt.show()
-```
-
-**Вывод:** Большинство пациентов (около 80%) отмечают наличие физической активности.
-
-## Корреляционный анализ
-
-Изучим линейные взаимосвязи между признаками, построив матрицу корреляций.
-
-```{python}
-#| label: correlation-heatmap
-#| fig-cap: "Тепловая карта корреляционной матрицы"
-#| fig-width: 12
-#| fig-height: 10
-
-# Подготовка данных для корреляции
-df_corr = df.drop(['id'], axis=1)
-
-# Расчет корреляционной матрицы
-correlation_matrix = df_corr.corr()
-
-# Создание маски для верхней треугольной части
-mask = np.triu(np.ones_like(correlation_matrix, dtype=bool))
-
-plt.figure(figsize=(12, 10))
-sns.heatmap(correlation_matrix, mask=mask, annot=True, cmap='RdYlBu_r', center=0,
-            square=True, fmt='.2f', cbar_kws={"shrink": .8})
-plt.title('Корреляционная матрица признаков', fontsize=16, pad=20)
-plt.tight_layout()
-plt.show()
-```
-
-**Вывод:** Корреляционная матрица не выявила мультиколлинеарности (экстремально высокой корреляции между предикторами), но показала заметную связь между давлением и целевой переменной.
-
-Выделим наиболее сильные корреляции для детального рассмотрения.
-
-```{python}
-#| label: strong-correlations
-#| tbl-cap: "Сильные корреляции (|r| > 0.3)"
-
-strong_correlations = []
-for i in range(len(correlation_matrix.columns)):
-    for j in range(i):
-        if abs(correlation_matrix.iloc[i, j]) > 0.3:
-            strong_correlations.append({
-                'Пара признаков': f"{correlation_matrix.columns[i]} - {correlation_matrix.columns[j]}",
-                'Коэффициент корреляции': correlation_matrix.iloc[i, j]
-            })
-
-GT(pd.DataFrame(strong_correlations))
-```
-
-**Вывод:** Сильнейшие корреляции наблюдаются между систолическим и диастолическим давлением, а также между ростом и полом (биологически обосновано).
-
 ## Анализ выбросов
 
 Используем диаграммы размаха (boxplot) для выявления аномальных значений в числовых признаках.
+
+Для удобства анализа преобразуем возраст из дней в годы во временной колонке для визуализации (до очистки).
+```{python}
+df['age_years_raw'] = df['age'] / 365.25
+```
 
 ### Выбросы: Возраст
 
@@ -736,7 +379,7 @@ GT(pd.DataFrame(strong_correlations))
 #| fig-height: 4
 
 plt.figure(figsize=(8, 4))
-sns.boxplot(data=df, x='age_years', color='#808080')
+sns.boxplot(data=df, x='age_years_raw', color='#808080')
 plt.title('Box Plot: Возраст', fontsize=14)
 plt.xlabel('Лет')
 plt.show()
@@ -818,7 +461,7 @@ plt.show()
 #| label: outliers-stats
 #| tbl-cap: "Статистика по выбросам"
 
-numeric_features = ['age_years', 'height', 'weight', 'ap_hi', 'ap_lo']
+numeric_features = ['age_years_raw', 'height', 'weight', 'ap_hi', 'ap_lo']
 outliers_data = []
 
 for feature in numeric_features:
@@ -850,6 +493,10 @@ GT(pd.DataFrame(outliers_data))
 ```{python}
 #| label: clean-init
 df_clean = df.copy()
+# Удаляем временную колонку, если она осталась
+if 'age_years_raw' in df_clean.columns:
+    df_clean = df_clean.drop('age_years_raw', axis=1)
+
 print(f"Исходный размер датасета: {df_clean.shape}")
 ```
 
@@ -899,13 +546,16 @@ print(f"Удалено записей с нереалистичным росто
 
 **Вывод:** Исключены записи с физиологически невозможными сочетаниями роста и веса.
 
-### Очистка возраста
+### Очистка и преобразование возраста
 
-Оставляем пациентов от 18 до 100 лет.
+Оставляем пациентов от 18 до 100 лет и создаем признак `age_years` для анализа.
 
 ```{python}
 #| label: clean-age
 #| fig-cap: "Очистка возраста"
+
+# Создаем возраст в годах
+df_clean['age_years'] = df_clean['age'] / 365.25
 
 before_age = len(df_clean)
 df_clean = df_clean[
@@ -915,7 +565,7 @@ after_age = len(df_clean)
 print(f"Удалено записей с нереалистичным возрастом: {before_age - after_age}")
 ```
 
-**Вывод:** Возрастной фильтр отработал, хотя количество удаленных записей минимально (данные по возрасту были достаточно чистыми).
+**Вывод:** Возрастной фильтр отработал, данные по возрасту были достаточно чистыми. Возраст успешно сконвертирован в годы.
 
 ### Расчет BMI
 
@@ -940,6 +590,310 @@ GT(clean_stats)
 ```
 
 **Вывод:** После очистки статистики (min/max/std) выглядят правдоподобно и пригодны для анализа.
+
+## Анализ категориальных признаков (структура)
+
+Посмотрим на уникальные значения в категориальных переменных для понимания их структуры (на очищенных данных).
+
+```{python}
+#| label: check-unique
+#| tbl-cap: "Уникальные значения категориальных признаков"
+
+categorical_cols = ['gender', 'cholesterol', 'gluc', 'smoke', 'alco', 'active', 'cardio']
+unique_data = []
+
+for col in categorical_cols:
+    unique_vals = sorted(df_clean[col].unique())
+    unique_data.append({"Признак": col, "Уникальные значения": str(unique_vals)})
+
+GT(pd.DataFrame(unique_data))
+```
+
+**Вывод:** Значения категориальных признаков соответствуют ожидаемым и не содержат неявных дубликатов или ошибок ввода.
+
+## Распределение целевой переменной
+
+Проанализируем сбалансированность классов целевой переменной `cardio` в очищенном датасете.
+
+```{python}
+#| label: target-distribution-plot
+#| fig-cap: "График распределения наличия сердечно-сосудистых заболеваний"
+#| fig-width: 8
+#| fig-height: 6
+
+plt.figure(figsize=(8, 6))
+ax = sns.countplot(data=df_clean, x='cardio', palette=['#808080', '#FF6B6B'])
+plt.title('Распределение наличия сердечно-сосудистых заболеваний', fontsize=14, pad=20)
+plt.xlabel('Наличие заболевания (0 - нет, 1 - да)', fontsize=12)
+plt.ylabel('Количество пациентов', fontsize=12)
+
+# Добавление процентов
+total = len(df_clean)
+for p in ax.patches:
+    percentage = f'{100 * p.get_height() / total:.1f}%'
+    ax.annotate(percentage, (p.get_x() + p.get_width() / 2., p.get_height()),
+                ha='center', va='bottom', fontsize=11)
+
+plt.tight_layout()
+plt.show()
+```
+
+Детальная статистика распределения целевой переменной:
+
+```{python}
+#| label: target-stats
+#| tbl-cap: "Статистика распределения целевой переменной"
+
+target_stats = df_clean['cardio'].value_counts().reset_index()
+target_stats.columns = ['Cardio', 'Count']
+target_stats['Percentage'] = (target_stats['Count'] / total * 100).round(1).astype(str) + '%'
+GT(target_stats)
+```
+
+**Вывод:** Классы сбалансированы (~50% на 50%), что позволяет использовать accuracy как одну из метрик и не требует применения техник балансировки (SMOTE и др.).
+
+## Распределения числовых признаков (очищенные данные)
+
+### Возраст
+
+Рассмотрим распределение возраста пациентов.
+
+```{python}
+#| label: dist-age
+#| fig-cap: "Гистограмма распределения возраста"
+#| fig-width: 10
+#| fig-height: 6
+
+plt.figure(figsize=(10, 6))
+sns.histplot(data=df_clean, x='age_years', bins=30, color='#808080', alpha=0.7)
+plt.title('Распределение возраста (годы)', fontsize=14)
+plt.xlabel('Возраст, лет')
+plt.ylabel('Частота')
+plt.grid(True, alpha=0.3)
+plt.show()
+```
+
+**Вывод:** Основная масса пациентов находится в возрасте от 40 до 65 лет, что соответствует группе риска ССЗ.
+
+### Рост
+
+Анализ распределения роста пациентов.
+
+```{python}
+#| label: dist-height
+#| fig-cap: "Гистограмма распределения роста"
+#| fig-width: 10
+#| fig-height: 6
+
+plt.figure(figsize=(10, 6))
+sns.histplot(data=df_clean, x='height', bins=30, color='#808080', alpha=0.7)
+plt.title('Распределение роста', fontsize=14)
+plt.xlabel('Рост, см')
+plt.ylabel('Частота')
+plt.grid(True, alpha=0.3)
+plt.show()
+```
+
+**Вывод:** Распределение роста близко к нормальному.
+
+### Вес
+
+Анализ распределения веса пациентов.
+
+```{python}
+#| label: dist-weight
+#| fig-cap: "Гистограмма распределения веса"
+#| fig-width: 10
+#| fig-height: 6
+
+plt.figure(figsize=(10, 6))
+sns.histplot(data=df_clean, x='weight', bins=30, color='#808080', alpha=0.7)
+plt.title('Распределение веса', fontsize=14)
+plt.xlabel('Вес, кг')
+plt.ylabel('Частота')
+plt.grid(True, alpha=0.3)
+plt.show()
+```
+
+**Вывод:** Распределение веса имеет "тяжелый" правый хвост, указывающий на наличие пациентов с значительным избыточным весом.
+
+### Систолическое давление
+
+Распределение верхнего (систолического) артериального давления.
+
+```{python}
+#| label: dist-ap-hi
+#| fig-cap: "Гистограмма систолического давления"
+#| fig-width: 10
+#| fig-height: 6
+
+plt.figure(figsize=(10, 6))
+sns.histplot(data=df_clean, x='ap_hi', bins=30, color='#808080', alpha=0.7)
+plt.title('Систолическое артериальное давление', fontsize=14)
+plt.xlabel('Давление, мм рт.ст.')
+plt.ylabel('Частота')
+plt.grid(True, alpha=0.3)
+plt.show()
+```
+
+**Вывод:** Данные по давлению теперь находятся в реалистичном диапазоне.
+
+### Диастолическое давление
+
+Распределение нижнего (диастолического) артериального давления.
+
+```{python}
+#| label: dist-ap-lo
+#| fig-cap: "Гистограмма диастолического давления"
+#| fig-width: 10
+#| fig-height: 6
+
+plt.figure(figsize=(10, 6))
+sns.histplot(data=df_clean, x='ap_lo', bins=30, color='#808080', alpha=0.7)
+plt.title('Диастолическое артериальное давление', fontsize=14)
+plt.xlabel('Давление, мм рт.ст.')
+plt.ylabel('Частота')
+plt.grid(True, alpha=0.3)
+plt.show()
+```
+
+**Вывод:** Данные диастолического давления очищены.
+
+## Распределения категориальных признаков
+
+Проанализируем категориальные факторы риска на очищенных данных.
+
+### Пол
+
+Соотношение мужчин и женщин в выборке.
+
+```{python}
+#| label: dist-gender
+#| fig-cap: "Столбчатая диаграмма распределения по полу"
+#| fig-width: 8
+#| fig-height: 6
+
+gender_counts = df_clean['gender'].value_counts()
+plt.figure(figsize=(8, 6))
+sns.barplot(x=['Женщины', 'Мужчины'], y=gender_counts.values, 
+            palette=['#808080', '#FF6B6B'])
+plt.title('Распределение по полу', fontsize=14)
+plt.ylabel('Количество')
+plt.grid(axis='y', alpha=0.3)
+plt.show()
+```
+
+**Вывод:** Женщины составляют большую часть выборки (~65%), что необходимо учитывать при интерпретации результатов.
+
+### Холестерин
+
+Уровни холестерина среди пациентов.
+
+```{python}
+#| label: dist-cholesterol
+#| fig-cap: "Столбчатая диаграмма уровней холестерина"
+#| fig-width: 8
+#| fig-height: 6
+
+cholesterol_counts = df_clean['cholesterol'].value_counts().sort_index()
+plt.figure(figsize=(8, 6))
+plt.bar(['Норма', 'Выше нормы', 'Высокий'], cholesterol_counts.values, 
+        color=['#808080', '#606060', '#FF6B6B'])
+plt.title('Уровень холестерина', fontsize=14)
+plt.ylabel('Количество')
+plt.grid(axis='y', alpha=0.3)
+plt.show()
+```
+
+**Вывод:** Большинство пациентов имеют нормальный уровень холестерина, но значительная доля (около 25%) находится в зоне повышенного риска.
+
+### Глюкоза
+
+Уровни глюкозы среди пациентов.
+
+```{python}
+#| label: dist-gluc
+#| fig-cap: "Столбчатая диаграмма уровней глюкозы"
+#| fig-width: 8
+#| fig-height: 6
+
+gluc_counts = df_clean['gluc'].value_counts().sort_index()
+plt.figure(figsize=(8, 6))
+plt.bar(['Норма', 'Выше нормы', 'Высокий'], gluc_counts.values, 
+        color=['#808080', '#606060', '#FF6B6B'])
+plt.title('Уровень глюкозы', fontsize=14)
+plt.ylabel('Количество')
+plt.grid(axis='y', alpha=0.3)
+plt.show()
+```
+
+**Вывод:** Аналогично холестерину, повышенный уровень глюкозы наблюдается у меньшинства, однако это важный фактор риска.
+
+### Курение
+
+Доля курящих пациентов.
+
+```{python}
+#| label: dist-smoke
+#| fig-cap: "Столбчатая диаграмма статуса курения"
+#| fig-width: 8
+#| fig-height: 6
+
+smoke_counts = df_clean['smoke'].value_counts()
+plt.figure(figsize=(8, 6))
+sns.barplot(x=['Не курят', 'Курят'], y=smoke_counts.values, 
+            palette=['#808080', '#FF6B6B'])
+plt.title('Курение', fontsize=14)
+plt.ylabel('Количество')
+plt.grid(axis='y', alpha=0.3)
+plt.show()
+```
+
+**Вывод:** Курящие пациенты составляют меньшую часть выборки. Интересно проверить корреляцию курения с полом и ССЗ.
+
+### Алкоголь
+
+Доля пациентов, употребляющих алкоголь.
+
+```{python}
+#| label: dist-alco
+#| fig-cap: "Столбчатая диаграмма употребления алкоголя"
+#| fig-width: 8
+#| fig-height: 6
+
+alco_counts = df_clean['alco'].value_counts()
+plt.figure(figsize=(8, 6))
+sns.barplot(x=['Не употребляют', 'Употребляют'], y=alco_counts.values, 
+            palette=['#808080', '#FF6B6B'])
+plt.title('Употребление алкоголя', fontsize=14)
+plt.ylabel('Количество')
+plt.grid(axis='y', alpha=0.3)
+plt.show()
+```
+
+**Вывод:** Употребление алкоголя задекларировано лишь у малой части пациентов (около 5%), что может быть связано с особенностями сбора данных (социальная желательность).
+
+### Физическая активность
+
+Уровень физической активности пациентов.
+
+```{python}
+#| label: dist-active
+#| fig-cap: "Столбчатая диаграмма физической активности"
+#| fig-width: 8
+#| fig-height: 6
+
+active_counts = df_clean['active'].value_counts()
+plt.figure(figsize=(8, 6))
+sns.barplot(x=['Неактивны', 'Активны'], y=active_counts.values, 
+            palette=['#808080', '#FF6B6B'])
+plt.title('Физическая активность', fontsize=14)
+plt.ylabel('Количество')
+plt.grid(axis='y', alpha=0.3)
+plt.show()
+```
+
+**Вывод:** Большинство пациентов (около 80%) отмечают наличие физической активности.
 
 ## Анализ BMI и категоризация
 
@@ -1025,6 +979,55 @@ GT(bmi_table)
 
 **Вывод:** Более 60% пациентов имеют вес выше нормы, что является серьезным фактором риска для сердечно-сосудистой системы.
 
+## Корреляционный анализ
+
+Изучим линейные взаимосвязи между признаками на очищенных данных, построив матрицу корреляций.
+
+```{python}
+#| label: correlation-heatmap
+#| fig-cap: "Тепловая карта корреляционной матрицы"
+#| fig-width: 12
+#| fig-height: 10
+
+# Подготовка данных для корреляции (исключаем ID и категориальную переменную BMI)
+df_corr = df_clean.drop(['id', 'bmi_category'], axis=1)
+
+# Расчет корреляционной матрицы
+correlation_matrix = df_corr.corr()
+
+# Создание маски для верхней треугольной части
+mask = np.triu(np.ones_like(correlation_matrix, dtype=bool))
+
+plt.figure(figsize=(12, 10))
+sns.heatmap(correlation_matrix, mask=mask, annot=True, cmap='RdYlBu_r', center=0,
+            square=True, fmt='.2f', cbar_kws={"shrink": .8})
+plt.title('Корреляционная матрица признаков', fontsize=16, pad=20)
+plt.tight_layout()
+plt.show()
+```
+
+**Вывод:** Корреляционная матрица не выявила мультиколлинеарности, но показала заметную связь между давлением и целевой переменной.
+
+Выделим наиболее сильные корреляции для детального рассмотрения.
+
+```{python}
+#| label: strong-correlations
+#| tbl-cap: "Сильные корреляции (|r| > 0.3)"
+
+strong_correlations = []
+for i in range(len(correlation_matrix.columns)):
+    for j in range(i):
+        if abs(correlation_matrix.iloc[i, j]) > 0.3:
+            strong_correlations.append({
+                'Пара признаков': f"{correlation_matrix.columns[i]} - {correlation_matrix.columns[j]}",
+                'Коэффициент корреляции': correlation_matrix.iloc[i, j]
+            })
+
+GT(pd.DataFrame(strong_correlations))
+```
+
+**Вывод:** Сильнейшие корреляции наблюдаются между систолическим и диастолическим давлением, а также между ростом и полом.
+
 # Построение моделей
 
 ## Подготовка данных для моделирования
@@ -1093,15 +1096,22 @@ cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 print("Обучение Logistic Regression...")
 lr_model = LogisticRegression(random_state=42, max_iter=1000)
 
-# Cross-validation
-lr_cv_scores = cross_val_score(lr_model, X_train_scaled, y_train, cv=cv, scoring='roc_auc')
-print(f"Logistic Regression CV AUC: {lr_cv_scores.mean():.4f} ± {lr_cv_scores.std():.4f}")
+# Cross-validation (accuracy)
+lr_cv_scores = cross_val_score(lr_model, X_train_scaled, y_train, cv=cv, scoring='accuracy')
+print(f"Logistic Regression CV Accuracy: {lr_cv_scores.mean():.4f} ± {lr_cv_scores.std():.4f}")
 
 # Обучение на полных данных
 lr_model.fit(X_train_scaled, y_train)
+
+# Оценка Accuracy на Train и Test
+lr_train_acc = accuracy_score(y_train, lr_model.predict(X_train_scaled))
+lr_test_acc = accuracy_score(y_test, lr_model.predict(X_test_scaled))
+
+print(f"LR Train Accuracy: {lr_train_acc:.4f}")
+print(f"LR Test Accuracy:  {lr_test_acc:.4f}")
 ```
 
-**Вывод:** Модель логистической регрессии обучена. Кросс-валидация показала стабильный результат, переобучения не наблюдается.
+**Вывод:** Модель логистической регрессии обучена.
 
 ### Random Forest
 
@@ -1112,15 +1122,22 @@ lr_model.fit(X_train_scaled, y_train)
 print("Обучение Random Forest...")
 rf_model = RandomForestClassifier(n_estimators=100, random_state=42, max_depth=10)
 
-# Cross-validation
-rf_cv_scores = cross_val_score(rf_model, X_train, y_train, cv=cv, scoring='roc_auc')
-print(f"Random Forest CV AUC: {rf_cv_scores.mean():.4f} ± {rf_cv_scores.std():.4f}")
+# Cross-validation (accuracy)
+rf_cv_scores = cross_val_score(rf_model, X_train, y_train, cv=cv, scoring='accuracy')
+print(f"Random Forest CV Accuracy: {rf_cv_scores.mean():.4f} ± {rf_cv_scores.std():.4f}")
 
 # Обучение на полных данных
 rf_model.fit(X_train, y_train)
+
+# Оценка Accuracy на Train и Test
+rf_train_acc = accuracy_score(y_train, rf_model.predict(X_train))
+rf_test_acc = accuracy_score(y_test, rf_model.predict(X_test))
+
+print(f"RF Train Accuracy: {rf_train_acc:.4f}")
+print(f"RF Test Accuracy:  {rf_test_acc:.4f}")
 ```
 
-**Вывод:** Random Forest обучен. Метрика ROC-AUC на кросс-валидации выше, чем у логистической регрессии, что ожидаемо для ансамблевых методов.
+**Вывод:** Random Forest обучен.
 
 ## Оценка качества моделей
 
@@ -1567,7 +1584,7 @@ print(f"Random Forest: {optimal_threshold_rf:.3f}")
 
 **Вывод:** Рассчитанные оптимальные пороги позволяют дополнительно (хоть и незначительно) улучшить качество классификации по метрике F1.
 
-# Обсуждение
+# Выводы и рекомендации
 
 ## Ключевые findings
 
