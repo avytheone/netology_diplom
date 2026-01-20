@@ -109,7 +109,7 @@ plt.rcParams['axes.labelsize'] = 11
 #| fig-cap: "Загрузка данных"
 
 # Загрузка данных
-data_path = 'cardio_train.csv'
+data_path = 'data/cardio_train.csv'
 df = pd.read_csv(data_path, sep=';')
 
 # Базовая информация
