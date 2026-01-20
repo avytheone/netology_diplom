@@ -13,9 +13,10 @@ copyright:
   license: "CC BY"
 pdf-engine: typst
 mainfont: "Times New Roman"
+lightbox: true
 format:
   html:
-    width: 1600px
+    width: 1800px
 ---
 
 # Введение
