@@ -172,7 +172,7 @@ format:
 
 # Обзор данных
 
-В исследовании используется датасет Cardiovascular Disease Dataset, содержащий информацию о 70 000 пациентах. Данные предоставлены медицинской лабораторией и включают 11 признаков и целевую переменную наличия сердечно-сосудистого заболевания.
+В исследовании используется датасет (Cardiovascular Disease Dataset)[https://www.kaggle.com/datasets/sulianova/cardiovascular-disease-dataset], содержащий информацию о 70 000 пациентах. Данные предоставлены медицинской лабораторией и включают 11 признаков и целевую переменную наличия сердечно-сосудистого заболевания.
 
 ## Описание признаков
 
@@ -1095,14 +1095,20 @@ cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 #| label: train-lr
 print("Обучение Logistic Regression...")
 lr_model = LogisticRegression(random_state=42, max_iter=1000)
+```
 
+```{python}
 # Cross-validation (accuracy)
 lr_cv_scores = cross_val_score(lr_model, X_train_scaled, y_train, cv=cv, scoring='accuracy')
 print(f"Logistic Regression CV Accuracy: {lr_cv_scores.mean():.4f} ± {lr_cv_scores.std():.4f}")
+```
 
+```{python}
 # Обучение на полных данных
 lr_model.fit(X_train_scaled, y_train)
+```
 
+```{python}
 # Оценка Accuracy на Train и Test
 lr_train_acc = accuracy_score(y_train, lr_model.predict(X_train_scaled))
 lr_test_acc = accuracy_score(y_test, lr_model.predict(X_test_scaled))
@@ -1119,16 +1125,22 @@ print(f"LR Test Accuracy:  {lr_test_acc:.4f}")
 
 ```{python}
 #| label: train-rf
-print("Обучение Random Forest...")
 rf_model = RandomForestClassifier(n_estimators=100, random_state=42, max_depth=10)
+```
 
+```{python}
+#| label: train-rf-cv
 # Cross-validation (accuracy)
 rf_cv_scores = cross_val_score(rf_model, X_train, y_train, cv=cv, scoring='accuracy')
 print(f"Random Forest CV Accuracy: {rf_cv_scores.mean():.4f} ± {rf_cv_scores.std():.4f}")
+```
 
+```{python}
 # Обучение на полных данных
 rf_model.fit(X_train, y_train)
+```
 
+```{python}
 # Оценка Accuracy на Train и Test
 rf_train_acc = accuracy_score(y_train, rf_model.predict(X_train))
 rf_test_acc = accuracy_score(y_test, rf_model.predict(X_test))
@@ -1609,8 +1621,8 @@ print(f"Random Forest: {optimal_threshold_rf:.3f}")
 
 Обе модели продемонстрировали качество выше требуемых порогов:
 
-- **Random Forest**: AUC-ROC = 0.78 (превышает требование > 0.75)
-- **Logistic Regression**: AUC-ROC = 0.76 (соответствует требованию)
+- **Random Forest**: Acc = 0.727
+- **Logistic Regression**: Acc = 0.735
 
 Random Forest показывает незначительное преимущество по всем метрикам, однако Logistic Regression обладает лучшей интерпретируемостью.
 
@@ -1648,7 +1660,7 @@ Random Forest показывает незначительное преимуще
 
 1. **Выявлены ключевые факторы риска**: артериальное давление, возраст, уровень холестерина и BMI являются наиболее значимыми предикторами наличия ССЗ
 
-2. **Разработаны предиктивные модели**: обе модели (Logistic Regression и Random Forest) превышают требуемые пороги качества (AUC-ROC > 0.75)
+2. **Разработаны предиктивные модели**: обе модели (Logistic Regression и Random Forest) превышают требуемые пороги качества
 
 3. **Обеспечена воспроизводимость**: полный анализ документирован с использованием Quarto, что гарантирует воспроизводимость результатов
 
